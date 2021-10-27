@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.0-rc.2.21480.10" />
-    <PackageReference Include="RapidCMS.Core" Version="4.2.0-preview" />
+    <PackageReference Include="RapidCMS.Core" Version="4.2.4-preview" />
   </ItemGroup>
 
 </Project>

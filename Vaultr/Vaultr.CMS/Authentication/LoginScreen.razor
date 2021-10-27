@@ -1,9 +1,13 @@
-﻿@inject NavigationManager Navigation
-
-<h4>Hi!</h4>
+﻿<h4>Hi!</h4>
 
 <p>Please sign in to access the CMS.</p>
 
-<hr />
+<EditForm Model=@Config OnValidSubmit=HandleSubmit>
+	<InputNumber @bind-Value=Config.NumberOfKeyVaults />
 
-<a class="btn btn-primary" href="/authentication/login">Login via OIDC</a>
+	<hr />
+
+	<button class="btn btn-primary">Log in</button>
+</EditForm>
+
+@*<a class="btn btn-primary" href="/authentication/login">Login via OIDC</a>*@

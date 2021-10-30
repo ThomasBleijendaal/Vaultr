@@ -1,6 +1,8 @@
-﻿using RapidCMS.Core.Abstractions.Data;
+﻿using Azure.Security.KeyVault.Secrets;
+using RapidCMS.Core.Abstractions.Data;
 using RapidCMS.Core.Abstractions.Forms;
 using RapidCMS.Core.Abstractions.Repositories;
+using RapidCMS.Core.Extensions;
 using Vaultr.CMS.Models;
 using Vaultr.Core.Abstractions;
 
@@ -9,10 +11,13 @@ namespace Vaultr.CMS.Repositories;
 public class KeyVaultRespository : IRepository
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
+    private readonly SecretClient _secretClient;
 
     public KeyVaultRespository(
+        SecretClient secretClient,
         IConfigurationStateProvider configurationStateProvider)
     {
+        _secretClient = secretClient;
         _configurationStateProvider = configurationStateProvider;
     }
 
@@ -28,17 +33,19 @@ public class KeyVaultRespository : IRepository
 
     public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view)
     {
-        return new[]
+        try
         {
-            new KeyVaultSecretEntity
+            var keys = await _secretClient.GetPropertiesOfSecretsAsync().ToListAsync();
+            return keys.Select(x => new KeyVaultSecretEntity
             {
-                Id = "id-1",
-                Values = Enumerable
-                    .Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1)
-                    .Select(x => x.ToString())
-                    .ToList()
-            }
-        };
+                Id = x.Name,
+                Values = Enumerable.Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1).Select(x => x.ToString()).ToList()
+            });
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view)
@@ -68,7 +75,7 @@ public class KeyVaultRespository : IRepository
         throw new NotImplementedException();
     }
 
-    public Task<IEntity> NewAsync(IViewContext viewContext, Type? variantType) 
+    public Task<IEntity> NewAsync(IViewContext viewContext, Type? variantType)
         => Task.FromResult<IEntity>(new KeyVaultSecretEntity());
 
     public Task RemoveAsync(IRelatedViewContext viewContext, string id)

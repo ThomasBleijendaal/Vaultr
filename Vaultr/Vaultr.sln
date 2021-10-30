@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vaultr.CMS", "Vaultr.CMS\Vaultr.CMS.csproj", "{3550B98A-D27A-4188-9546-D6D50C0E08FC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.CMS", "Vaultr.CMS\Vaultr.CMS.csproj", "{3550B98A-D27A-4188-9546-D6D50C0E08FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vaultr.Core", "Vaultr.Core\Vaultr.Core.csproj", "{5884718F-04BC-44C0-8697-AFEBA351C878}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.Core", "Vaultr.Core\Vaultr.Core.csproj", "{5884718F-04BC-44C0-8697-AFEBA351C878}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

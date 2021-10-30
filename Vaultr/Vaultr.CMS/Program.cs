@@ -33,7 +33,6 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 builder.Services.AddAuthorizationCore();
-builder.Services.AddSingleton(new HttpClient());
 builder.Services.AddSingleton(localStorage);
 builder.Services.AddSingleton(sessionStorage);
 
@@ -45,18 +44,37 @@ builder.Services.AddSingleton<IPlugin, KeyVaultCollectionPlugin>();
 builder.Services.AddSingleton<KeyVaultRespository>();
 builder.Services.AddSingleton((sp) =>
 {
+    var clients = new SecretClients();
+
+    var stateProvider = sp.GetRequiredService<IConfigurationStateProvider>();
+
+    var currentState = stateProvider.GetCurrentState();
+    if (currentState == null)
+    {
+        return clients;
+    }
+
     var tokenCredential = sp.GetRequiredService<DelegatedTokenCredential>();
-    var httpClient = sp.GetRequiredService<HttpClient>();
+    
+    foreach (var keyVault in currentState.KeyVaults)
+    {
+        var httpClient = new HttpClient(new TransformUrlHttpMessageHandler(keyVault.Name));
+        
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenCredential.GetToken());
+        httpClient.BaseAddress = new Uri($"https://vaultr.azurewebsites.net/{keyVault.Name}/");
 
-    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenCredential.GetToken());
-
-    return new SecretClient(
-        new Uri("https://vaultr.azurewebsites.net"),
-        tokenCredential,
-        new SecretClientOptions
+        var options = new SecretClientOptions
         {
             Transport = new HttpClientTransport(httpClient)
-        });
+        };
+
+        clients.Add(keyVault.Name, new SecretClient(
+            new Uri("https://vaultr.azurewebsites.net"),
+            tokenCredential,
+            options));
+    }
+
+    return clients;
 });
 builder.Services.AddSingleton<DelegatedTokenCredential>();
 

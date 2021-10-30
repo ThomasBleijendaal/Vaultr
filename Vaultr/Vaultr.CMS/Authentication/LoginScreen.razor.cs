@@ -15,10 +15,18 @@ public partial class LoginScreen
     [Inject]
     public IConfigurationStateProvider ConfigurationStateProvider { get; set; } = null!;
 
+    protected override void OnInitialized()
+    {
+        Config = ConfigurationStateProvider.GetCurrentState() ?? Config;
+    }
+
     private void HandleSubmit(EditContext context)
     {
         ConfigurationStateProvider.SetState(Config);
 
-        Navigation.NavigateTo("/", true);
+        if (Config.IsValid())
+        {
+            Navigation.NavigateTo("/authentication/login", true);
+        }
     }
 }

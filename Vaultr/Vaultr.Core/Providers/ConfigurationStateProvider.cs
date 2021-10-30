@@ -20,6 +20,12 @@ namespace Vaultr.Core.Providers
 
         public void SetState(ConfigurationState state)
         {
+            state.KeyVaults = state.KeyVaults
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .GroupBy(x => x.Name)
+                .Select(x => x.First())
+                .ToList();
+
             _localStorage.SetItem("vaultr-config", state);
             _state = state;
         }

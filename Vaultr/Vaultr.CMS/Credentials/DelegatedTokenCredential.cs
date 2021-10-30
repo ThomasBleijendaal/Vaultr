@@ -34,16 +34,9 @@ public class DelegatedTokenCredential : TokenCredential
         throw new UnauthorizedAccessException();
     }
 
-    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
-    {
-        Console.WriteLine("GETTOKENASYNC");
-        return new AccessToken(GetToken(), DateTimeOffset.FromUnixTimeSeconds(1635422537));
+    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken) 
+        => new AccessToken(GetToken(), DateTimeOffset.UtcNow.AddHours(1));
 
-    }
-
-    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken)
-    {
-        Console.WriteLine("GETTOKENASYNC");
-        return new ValueTask<AccessToken>(Task.FromResult(GetToken(requestContext, cancellationToken)));
-    }
+    public override ValueTask<AccessToken> GetTokenAsync(TokenRequestContext requestContext, CancellationToken cancellationToken) 
+        => new ValueTask<AccessToken>(Task.FromResult(GetToken(requestContext, cancellationToken)));
 }

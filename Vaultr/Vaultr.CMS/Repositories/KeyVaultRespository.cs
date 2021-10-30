@@ -1,5 +1,4 @@
-﻿using Azure.Security.KeyVault.Secrets;
-using RapidCMS.Core.Abstractions.Data;
+﻿using RapidCMS.Core.Abstractions.Data;
 using RapidCMS.Core.Abstractions.Forms;
 using RapidCMS.Core.Abstractions.Repositories;
 using RapidCMS.Core.Extensions;
@@ -11,13 +10,13 @@ namespace Vaultr.CMS.Repositories;
 public class KeyVaultRespository : IRepository
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
-    private readonly SecretClient _secretClient;
+    private readonly SecretClients _secretClients;
 
     public KeyVaultRespository(
-        SecretClient secretClient,
+        SecretClients secretClients,
         IConfigurationStateProvider configurationStateProvider)
     {
-        _secretClient = secretClient;
+        _secretClients = secretClients;
         _configurationStateProvider = configurationStateProvider;
     }
 
@@ -33,19 +32,29 @@ public class KeyVaultRespository : IRepository
 
     public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view)
     {
-        try
+        var secrets = new List<KeyVaultSecretEntity>();
+
+        foreach (var kv in _secretClients)
         {
-            var keys = await _secretClient.GetPropertiesOfSecretsAsync().ToListAsync();
-            return keys.Select(x => new KeyVaultSecretEntity
+            var keyVaultSecrets = await kv.Value.GetPropertiesOfSecretsAsync().ToListAsync();
+
+            foreach (var keyVaultSecret in keyVaultSecrets)
             {
-                Id = x.Name,
-                Values = Enumerable.Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1).Select(x => x.ToString()).ToList()
-            });
+                var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
+                if (secret == null)
+                {
+                    secret = new KeyVaultSecretEntity
+                    {
+                        Id = keyVaultSecret.Name
+                    };
+                    secrets.Add(secret);
+                }
+
+                secret.KeyVaultUris.Add(kv.Key, keyVaultSecret.Id);
+            }
         }
-        catch (Exception ex)
-        {
-            throw;
-        }
+
+        return secrets;
     }
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view)
@@ -60,14 +69,15 @@ public class KeyVaultRespository : IRepository
 
     public async Task<IEntity?> GetByIdAsync(string id, IViewContext viewContext)
     {
-        return new KeyVaultSecretEntity
-        {
-            Id = $"id-{id}",
-            Values = Enumerable
-                .Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1)
-                .Select(x => x.ToString())
-                .ToList()
-        };
+        throw new NotImplementedException();
+        //return new KeyVaultSecretEntity
+        //{
+        //    Id = $"id-{id}",
+        //    Values = Enumerable
+        //        .Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1)
+        //        .Select(x => x.ToString())
+        //        .ToList()
+        //};
     }
 
     public Task<IEntity?> InsertAsync(IEditContext editContext)

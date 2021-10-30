@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using RapidCMS.Core.Abstractions.Metadata;
+﻿using RapidCMS.Core.Abstractions.Metadata;
 using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Abstractions.Setup;
@@ -30,7 +29,7 @@ public class KeyVaultCollectionPlugin : IPlugin
         var state = _configurationStateProvider.GetCurrentState();
         if (state == null)
         {
-            return null;
+            return Task.FromResult(default(IResolvedSetup<CollectionSetup>));
         } 
 
         var collection = new CollectionSetup("AzureKeyVault", "RedOrange10", "Secrets", "vaultr::secrets", "vaultr::secrets")
@@ -66,12 +65,16 @@ public class KeyVaultCollectionPlugin : IPlugin
                                 Expression = _keyVaultSecretIdExpression,
                                 Index = 0
                             }
-                        }.Concat(Enumerable.Range(0, state.NumberOfKeyVaults).Select(x =>
+                        }.Concat(state.KeyVaults.Select(x =>
                             new PropertyFieldSetup
-                            {
-                                Name = $"Key{x + 1}",
-                                Property = new PropertyMetadata<KeyVaultSecretEntity>($"Key{x}", typeof(string), (e) => e.Values[x], (e, v) => e.Values[x] = ((string?)v) ?? "", Guid.NewGuid().ToString()),
-                                Index = x
+                            {   
+                                Name = x.Name,
+                                Property = new PropertyMetadata<KeyVaultSecretEntity>(
+                                    x.Name, 
+                                    typeof(string), 
+                                    (e) => e.KeyVaultUris.TryGetValue(x.Name, out var uri) ? uri.ToString() : null, 
+                                    (e, v) => e.Values[x.Name] = ((string?)v) ?? "", 
+                                    Guid.NewGuid().ToString())
                             })
                         ).ToList(),
                         new List<ISubCollectionListSetup>(),

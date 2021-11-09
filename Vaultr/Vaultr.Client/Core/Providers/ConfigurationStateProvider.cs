@@ -1,33 +1,37 @@
-﻿using Blazored.LocalStorage;
+﻿using System.Linq;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
 
-namespace Vaultr.Client.Core.Providers
+namespace Vaultr.Client.Core.Providers;
+
+public class ConfigurationStateProvider : IConfigurationStateProvider
 {
-    public class ConfigurationStateProvider : IConfigurationStateProvider
+    private ConfigurationState? _state;
+
+    public ConfigurationStateProvider()
     {
-        private readonly ISyncLocalStorageService _localStorage;
-        private ConfigurationState _state;
 
-        public ConfigurationStateProvider(
-            ISyncLocalStorageService localStorage)
+    }
+
+    public ConfigurationState GetCurrentState()
+        => _state ??= new ConfigurationState
         {
-            _localStorage = localStorage;
-        }
+            KeyVaults =
+            {
+                new ConfigurationState.KeyVaultConfiguration { Name = "vaultr-test" },
+                new ConfigurationState.KeyVaultConfiguration { Name = "vaultr-prod" }
+            },
+            TenantId = "324bfecd-c8d2-4233-887b-c1be7fa11256"
+        };
 
-        public ConfigurationState GetCurrentState()
-            => _state ??= _localStorage.GetItem<ConfigurationState>("vaultr-config");
+    public void SetState(ConfigurationState state)
+    {
+        state.KeyVaults = state.KeyVaults
+            .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+            .GroupBy(x => x.Name)
+            .Select(x => x.First())
+            .ToList();
 
-        public void SetState(ConfigurationState state)
-        {
-            state.KeyVaults = state.KeyVaults
-                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
-                .GroupBy(x => x.Name)
-                .Select(x => x.First())
-                .ToList();
-
-            _localStorage.SetItem("vaultr-config", state);
-            _state = state;
-        }
+        _state = state;
     }
 }

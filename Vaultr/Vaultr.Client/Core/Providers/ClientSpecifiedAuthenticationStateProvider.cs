@@ -1,35 +1,35 @@
 ﻿using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components.Authorization;
 using Vaultr.Client.Core.Abstractions;
 
-namespace Vaultr.Client.Core.Providers
+namespace Vaultr.Client.Core.Providers;
+
+public class ClientSpecifiedAuthenticationStateProvider : AuthenticationStateProvider
 {
-    public class ClientSpecifiedAuthenticationStateProvider : AuthenticationStateProvider
+    private readonly IConfigurationStateProvider _configurationStateProvider;
+
+    public ClientSpecifiedAuthenticationStateProvider(
+        IConfigurationStateProvider configurationStateProvider)
     {
-        private readonly IConfigurationStateProvider _configurationStateProvider;
+        _configurationStateProvider = configurationStateProvider;
+    }
 
-        public ClientSpecifiedAuthenticationStateProvider(
-            IConfigurationStateProvider configurationStateProvider)
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        var state = _configurationStateProvider.GetCurrentState();
+        if (state?.IsValid() != true)
         {
-            _configurationStateProvider = configurationStateProvider;
+            return Task.FromResult(new AuthenticationState(new ClaimsPrincipal()));
         }
-
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        else
         {
-            var state = _configurationStateProvider.GetCurrentState();
-            if (state == null)
-            {
-                return Task.FromResult(new AuthenticationState(new ClaimsPrincipal()));
-            }
-            else
-            {
-                var id = new ClaimsIdentity("anonymous");
-                id.AddClaim(new Claim(ClaimTypes.Name, "Anonymous"));
+            var id = new ClaimsIdentity("anonymous");
+            id.AddClaim(new Claim(ClaimTypes.Name, "Anonymous"));
 
-                var principal = new ClaimsPrincipal(id);
+            var principal = new ClaimsPrincipal(id);
 
-                return Task.FromResult(new AuthenticationState(principal));
-            }
+            return Task.FromResult(new AuthenticationState(principal));
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using Vaultr.Client.Core.Models;
 
-namespace Vaultr.Client.Core.Abstractions
-{
-    public interface IConfigurationStateProvider
-    {
-        ConfigurationState GetCurrentState();
+namespace Vaultr.Client.Core.Abstractions;
 
-        void SetState(ConfigurationState state);
-    }
+public interface IConfigurationStateProvider
+{
+    ConfigurationState GetCurrentState();
+
+    void SetState(ConfigurationState state);
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Vaultr.CMS.Repositories;
 using Vaultr.Core.Abstractions;
 using Vaultr.Core.Models;
 
@@ -14,6 +15,9 @@ public partial class LoginScreen
 
     [Inject]
     public IConfigurationStateProvider ConfigurationStateProvider { get; set; } = null!;
+
+    [Inject]
+    public SecretClientsProvider SecretClientsProvider { get; set; } = null!;
 
     protected override void OnInitialized()
     {

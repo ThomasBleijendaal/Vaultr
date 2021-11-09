@@ -4,8 +4,8 @@
     <TargetFrameworks>net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(MSBuildRuntimeType)' == 'Full'">$(TargetFrameworks);net6.0-windows10.0.19041</TargetFrameworks>
     <OutputType>Exe</OutputType>
-    <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Vaultr.Client</RootNamespace>
+    <Nullable>enable</Nullable>
     <UseMaui>true</UseMaui>
     <SingleProject>true</SingleProject>
     <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
@@ -63,11 +63,6 @@
     <PackageReference Include="RapidCMS.UI" Version="4.2.5-preview" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.2.0" />
-    <PackageReference Include="Microsoft.Authentication.WebAssembly.Msal" Version="6.0.0-rc.2.21480.10" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Vaultr.Core\Vaultr.Core.csproj" />
   </ItemGroup>
 
 </Project>

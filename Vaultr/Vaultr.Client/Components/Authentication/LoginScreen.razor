@@ -3,21 +3,23 @@
 <p>Please sign in to access the CMS.</p>
 
 <EditForm Model=@Config OnValidSubmit=HandleSubmit>
-	@* TODO: ADD AD *@
+    <InputText @bind-Value=Config.TenantId />
 
-	<hr />
+    <hr />
 
-	<p>Key Vaults to connect to</p>
+    <p>Key Vaults to connect to</p>
 
-	@foreach (var kv in Config.KeyVaults)
-	{
-		<InputText @bind-Value=kv.Name />
-	}
+    @foreach (var kv in Config.KeyVaults)
+    {
+        <InputText @bind-Value=kv.Name />
+    }
 
-	<button class="btn btn-primary" type="button" @onclick=@((e) => Config.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
+    <hr />
 
-	<hr />
+    <button class="btn btn-primary" type="button" @onclick=@((e) => Config.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
 
-	<button class="btn btn-primary">Log in</button>
+    <hr />
+
+    <button class="btn btn-primary">Log in</button>
 </EditForm>
 

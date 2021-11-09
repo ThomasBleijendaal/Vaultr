@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components.Forms;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
+using Vaultr.Client.Data.Repositories;
 
 namespace Vaultr.Client.Components.Authentication;
 
@@ -15,6 +16,9 @@ public partial class LoginScreen
     [Inject]
     public IConfigurationStateProvider ConfigurationStateProvider { get; set; } = null!;
 
+    [Inject]
+    public SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+
     protected override void OnInitialized()
     {
         Config = ConfigurationStateProvider.GetCurrentState() ?? Config;
@@ -24,9 +28,11 @@ public partial class LoginScreen
     {
         ConfigurationStateProvider.SetState(Config);
 
+        SecretClientsProvider.Build();
+
         if (Config.IsValid())
         {
-            Navigation.NavigateTo("/authentication/login", true);
+            Navigation.NavigateTo("/", true);
         }
     }
 }

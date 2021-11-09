@@ -58,10 +58,10 @@ builder.Services.AddSingleton((sp) =>
     
     foreach (var keyVault in currentState.KeyVaults)
     {
-        var httpClient = new HttpClient(new TransformUrlHttpMessageHandler(keyVault.Name));
+        var httpClient = new HttpClient();
         
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenCredential.GetToken());
-        httpClient.BaseAddress = new Uri($"https://vaultr.azurewebsites.net/{keyVault.Name}/");
+        httpClient.DefaultRequestHeaders.Add("x-vaultr-keyvault", keyVault.Name);
 
         var options = new SecretClientOptions
         {
@@ -90,6 +90,7 @@ builder.Services.AddRapidCMSWebAssembly(config =>
 
 builder.Services.AddMsalAuthentication(options =>
 {
+    // TODO: ask these credentials
     builder.Configuration.Bind("AzureAd", options.ProviderOptions);
 });
 

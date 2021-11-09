@@ -4,6 +4,7 @@ using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Abstractions.Setup;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Models.Setup;
+using Vaultr.CMS.Editors;
 using Vaultr.CMS.Metadata;
 using Vaultr.CMS.Models;
 using Vaultr.CMS.Repositories;
@@ -56,7 +57,10 @@ public class KeyVaultCollectionPlugin : IPlugin
                         default, 
                         (m, s) => true, 
                         typeof(KeyVaultSecretEntity), 
-                        new List<IButtonSetup>(), 
+                        new List<IButtonSetup>
+                        {
+                            
+                        }, 
                         new List<IFieldSetup>
                         {
                             new ExpressionFieldSetup()
@@ -66,9 +70,10 @@ public class KeyVaultCollectionPlugin : IPlugin
                                 Index = 0
                             }
                         }.Concat(state.KeyVaults.Select(x =>
-                            new PropertyFieldSetup
+                            new CustomPropertyFieldSetup(typeof(SecretEditor))
                             {   
                                 Name = x.Name,
+                                Configuration = x.Name,
                                 Property = new PropertyMetadata<KeyVaultSecretEntity>(
                                     x.Name, 
                                     typeof(string), 

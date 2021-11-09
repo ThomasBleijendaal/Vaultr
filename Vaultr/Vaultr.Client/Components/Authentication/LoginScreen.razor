@@ -1,0 +1,23 @@
+﻿<h4>Hi!</h4>
+
+<p>Please sign in to access the CMS.</p>
+
+<EditForm Model=@Config OnValidSubmit=HandleSubmit>
+	@* TODO: ADD AD *@
+
+	<hr />
+
+	<p>Key Vaults to connect to</p>
+
+	@foreach (var kv in Config.KeyVaults)
+	{
+		<InputText @bind-Value=kv.Name />
+	}
+
+	<button class="btn btn-primary" type="button" @onclick=@((e) => Config.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
+
+	<hr />
+
+	<button class="btn btn-primary">Log in</button>
+</EditForm>
+

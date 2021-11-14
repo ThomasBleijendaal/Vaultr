@@ -3,13 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.CMS", "Vaultr.CMS\Vaultr.CMS.csproj", "{3550B98A-D27A-4188-9546-D6D50C0E08FC}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.Core", "Vaultr.Core\Vaultr.Core.csproj", "{5884718F-04BC-44C0-8697-AFEBA351C878}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.Functions", "Vaultr.Functions\Vaultr.Functions.csproj", "{AC317B7C-FAC6-4B63-8FB0-74A30B79AC69}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vaultr.Client", "Vaultr.Client\Vaultr.Client.csproj", "{A19EFF57-4085-4355-BCFC-CAF175C4F813}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.Client", "Vaultr.Client\Vaultr.Client.csproj", "{A19EFF57-4085-4355-BCFC-CAF175C4F813}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,18 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3550B98A-D27A-4188-9546-D6D50C0E08FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3550B98A-D27A-4188-9546-D6D50C0E08FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3550B98A-D27A-4188-9546-D6D50C0E08FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3550B98A-D27A-4188-9546-D6D50C0E08FC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5884718F-04BC-44C0-8697-AFEBA351C878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5884718F-04BC-44C0-8697-AFEBA351C878}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5884718F-04BC-44C0-8697-AFEBA351C878}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5884718F-04BC-44C0-8697-AFEBA351C878}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC317B7C-FAC6-4B63-8FB0-74A30B79AC69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC317B7C-FAC6-4B63-8FB0-74A30B79AC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC317B7C-FAC6-4B63-8FB0-74A30B79AC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC317B7C-FAC6-4B63-8FB0-74A30B79AC69}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.Deploy.0 = Debug|Any CPU

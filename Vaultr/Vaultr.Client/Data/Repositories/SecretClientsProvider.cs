@@ -24,16 +24,19 @@ public class SecretClientsProvider
 
         var state = _configurationStateProvider.GetCurrentState();
 
-        var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+        if (state.IsValid())
         {
-            TenantId = state.TenantId
-        });
+            var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+            {
+                TenantId = state.TenantId
+            });
 
-        foreach (var kv in state.KeyVaults)
-        {
-            _clients.Add(kv.Name, new SecretClient(
-                new Uri($"https://{kv.Name}.vault.azure.net"),
-                credential));
+            foreach (var kv in state.KeyVaults)
+            {
+                _clients.Add(kv.Name, new SecretClient(
+                    new Uri($"https://{kv.Name}.vault.azure.net"),
+                    credential));
+            }
         }
     }
 

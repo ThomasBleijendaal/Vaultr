@@ -2,26 +2,36 @@
 <html>
 
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Vaultr.Client</title>
-	<base href="/" />
-	<link href="_content/rapidcms.ui/css/site.css" rel="stylesheet" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vaultr.Client</title>
+    <base href="/" />
+    <link href="_content/rapidcms.ui/css/site.css" rel="stylesheet" />
+    <style>
+        .btn .ms-Icon {
+            margin-right: 0;
+        }
+    </style>
 </head>
 
 <body>
-	<div id="app">Loading...</div>
+    <div id="app">Loading...</div>
 
-	<div id="blazor-error-ui" style="display: none;">
-		An unhandled error has occurred.
-		<a href="" class="reload">Reload</a>
-		<a class="dismiss">🗙</a>
-	</div>
+    <div id="blazor-error-ui" style="display: none;">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
 
-	<script src="_framework/blazor.webview.js" autostart="false"></script>
-	<script src="_content/rapidcms.ui/js/interop.js"></script>
-	<script src="js/popper.min.js"></script>
-	<script src="js/interop.js"></script>
+    <script src="_framework/blazor.webview.js" autostart="false"></script>
+    <script src="_content/rapidcms.ui/js/interop.js"></script>
+    <script>
+        window.clipboardCopy = {
+            copyText: function (text) {
+                navigator.clipboard.writeText(text);
+            }
+        };
+    </script>
 </body>
 
 </html>

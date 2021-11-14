@@ -66,20 +66,12 @@ public class KeyVaultRespository : IRepository
         throw new NotImplementedException();
     }
 
-    public async Task<IEntity> GetByIdAsync(string id, IViewContext viewContext)
+    public Task<IEntity?> GetByIdAsync(string id, IViewContext viewContext)
     {
         throw new NotImplementedException();
-        //return new KeyVaultSecretEntity
-        //{
-        //    Id = $"id-{id}",
-        //    Values = Enumerable
-        //        .Range(1, _configurationStateProvider.GetCurrentState()?.NumberOfKeyVaults ?? 1)
-        //        .Select(x => x.ToString())
-        //        .ToList()
-        //};
     }
 
-    public Task<IEntity> InsertAsync(IEditContext editContext)
+    public Task<IEntity?> InsertAsync(IEditContext editContext)
     {
         throw new NotImplementedException();
     }
@@ -92,7 +84,7 @@ public class KeyVaultRespository : IRepository
         throw new NotImplementedException();
     }
 
-    public Task ReorderAsync(string beforeId, string id, IViewContext viewContext)
+    public Task ReorderAsync(string? beforeId, string id, IViewContext viewContext)
     {
         throw new NotImplementedException();
     }

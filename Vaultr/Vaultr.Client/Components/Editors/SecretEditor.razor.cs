@@ -3,35 +3,38 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
+using RapidCMS.Core.Abstractions.Mediators;
+using RapidCMS.Core.Enums;
+using RapidCMS.Core.Models.EventArgs.Mediators;
 
 namespace Vaultr.Client.Components.Editors
 {
     public partial class SecretEditor
     {
-        private string _buttonId = "_" + Guid.NewGuid().ToString().Replace("-", "");
-        private string _menuId = "_" + Guid.NewGuid().ToString().Replace("-", "");
-
         private string? Value { get; set; }
         private bool IsDecrypted { get; set; }
         private bool IsModified { get; set; }
         private bool IsEmpty => string.IsNullOrEmpty(GetValueAsString());
         private bool IsEncrypted => !IsEmpty && !IsDecrypted;
 
+        private int KeyVaultIndex => SecretClientsProvider.Clients.Keys.ToList().IndexOf(KeyVaultName);
+
+        private bool CanPromote => !IsEmpty && KeyVaultIndex < SecretClientsProvider.Clients.Count - 1;
+        private bool CanDemote => !IsEmpty && KeyVaultIndex > 0;
+
         private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
+
+        private string? NextKeyVaultName => CanPromote ? SecretClientsProvider.Clients.Keys.ElementAt(KeyVaultIndex + 1) : null;
+        private string? PreviousKeyVaultName => CanDemote ? SecretClientsProvider.Clients.Keys.ElementAt(KeyVaultIndex - 1) : null;
 
         private SecretClient SecretClient => SecretClientsProvider.Clients[KeyVaultName];
 
+        [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
+
+        [Inject] private IMediator Mediator { get; set; } = null!;
+
         private string KeyName => new Uri(GetValueAsString()).AbsolutePath.Split('/').Last();
-
-        [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            await JSRuntime.InvokeAsync<bool>("Interop.addPopper", _buttonId, _menuId);
-            await base.OnAfterRenderAsync(firstRender);
-        }
 
         private string GetValue()
         {
@@ -51,17 +54,24 @@ namespace Vaultr.Client.Components.Editors
             }
         }
 
-        private async Task UnlockAsync(MouseEventArgs e)
+        private async Task UnlockAsync()
         {
-            var secret = await SecretClient.GetSecretAsync(KeyName);
+            try
+            {
+                var secret = await SecretClient.GetSecretAsync(KeyName);
 
-            IsDecrypted = true;
-            Value = secret.Value.Value;
+                IsDecrypted = true;
+                Value = secret.Value.Value;
 
-            StateHasChanged();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secret: {ex.Message}"));
+            }
         }
 
-        private void Lock(MouseEventArgs e)
+        private void Lock()
         {
             Value = null;
             IsDecrypted = false;
@@ -70,19 +80,107 @@ namespace Vaultr.Client.Components.Editors
             StateHasChanged();
         }
 
-        private async Task SaveAsync(MouseEventArgs e)
+        private async Task SaveAsync()
         {
-            await SecretClient.SetSecretAsync(KeyName, Value);
-            Lock(e);
+            try
+            {
+                await SecretClient.SetSecretAsync(KeyName, Value);
+                Lock();
+
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret saved!"));
+                Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+            }
+            catch (Exception ex)
+            {
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to save secret: {ex.Message}"));
+            }
         }
+
+        private Task DemoteAsync() => PreviousKeyVaultName != null ? CopyAsync(PreviousKeyVaultName) : Task.CompletedTask;
+        private Task PromoteAsync() => NextKeyVaultName != null ? CopyAsync(NextKeyVaultName) : Task.CompletedTask;
 
         private async Task CopyAsync(string targetKeyVault)
         {
-            var secret = await SecretClient.GetSecretAsync(KeyName);
+            try
+            {
+                var secret = await SecretClient.GetSecretAsync(KeyName);
 
-            var targetSecretClient = SecretClientsProvider.Clients[targetKeyVault];
+                var targetSecretClient = SecretClientsProvider.Clients[targetKeyVault];
 
-            await targetSecretClient.SetSecretAsync(KeyName, secret.Value.Value);
+                var hasDeletedSecret = false;
+                try
+                {
+                    var deletedSecret = await targetSecretClient.GetDeletedSecretAsync(KeyName);
+                    hasDeletedSecret = deletedSecret.GetRawResponse().Status == 200;
+                }
+                catch
+                {
+
+                }
+
+                if (hasDeletedSecret)
+                {
+                    var recovery = await targetSecretClient.StartRecoverDeletedSecretAsync(KeyName);
+
+                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Recovering deleted secret.."));
+
+                    await recovery.WaitForCompletionAsync();
+
+                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Deleted secret recovered."));
+                }
+
+                await targetSecretClient.SetSecretAsync(KeyName, secret.Value.Value);
+
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied!"));
+                Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+
+                Lock();
+            }
+            catch (Exception ex)
+            {
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to copy secret: {ex.Message}"));
+            }
+        }
+
+        private async Task CopyToClipboardAsync()
+        {
+            try
+            {
+                var secret = await SecretClient.GetSecretAsync(KeyName, Value);
+                await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", secret.Value.Value);
+
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied to clipboard!"));
+            }
+            catch (Exception ex)
+            {
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secret: {ex.Message}"));
+            }
+        }
+
+        private async Task DeleteAsync()
+        {
+            try
+            {
+                // TODO: change to mediator event with confirm pane
+                if (await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?"))
+                {
+                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Deleting secret.."));
+
+                    SetValue(null!);
+
+                    var deletion = await SecretClient.StartDeleteSecretAsync(KeyName);
+                    await deletion.WaitForCompletionAsync();
+
+                    Lock();
+
+                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret deleted!"));
+                    Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+                }
+            }
+            catch (Exception ex)
+            {
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to delete secret: {ex.Message}"));
+            }
         }
     }
 }

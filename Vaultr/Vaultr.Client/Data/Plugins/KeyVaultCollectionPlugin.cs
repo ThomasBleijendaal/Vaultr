@@ -7,6 +7,7 @@ using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Abstractions.Setup;
 using RapidCMS.Core.Enums;
+using RapidCMS.Core.Handlers;
 using RapidCMS.Core.Models.Setup;
 using Vaultr.Client.Components.Editors;
 using Vaultr.Client.Core.Abstractions;
@@ -20,6 +21,7 @@ public class KeyVaultCollectionPlugin : IPlugin
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
     private readonly IExpressionMetadata _keyVaultSecretIdExpression = new ExpressionMetadata<KeyVaultSecretEntity>("Id", x => x.Id ?? string.Empty);
+    private readonly IEntityVariantSetup _secretVariant = new EntityVariantSetup("KeyVaultSecret", "AzureKeyVault", typeof(KeyVaultSecretEntity), "vaultr::secretentity");
 
     public KeyVaultCollectionPlugin(
         IConfigurationStateProvider configurationStateProvider)
@@ -45,7 +47,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                 false,
                 false,
                 _keyVaultSecretIdExpression),
-            EntityVariant = new EntityVariantSetup("KeyVaultSecret", "AzureKeyVault", typeof(KeyVaultSecretEntity), "vaultr::secretentity"),
+            EntityVariant = _secretVariant,
             Collections = new List<ITreeElementSetup>(),
             UsageType = UsageType.List,
             ListEditor = new ListSetup(
@@ -67,6 +69,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                         },
                         new List<IFieldSetup>
                         {
+                            // TODO: add support for createing new secrets and for creating copies via mediator pane
                             new ExpressionFieldSetup()
                             {
                                 Name = "Id",
@@ -91,7 +94,17 @@ public class KeyVaultCollectionPlugin : IPlugin
                 },
                 new List<IButtonSetup>
                 {
-
+                    new ButtonSetup()
+                    {
+                        ButtonHandlerType = typeof(DefaultButtonActionHandler),
+                        ButtonId = "newsecret",
+                        Buttons = new List<IButtonSetup>(),
+                        DefaultButtonType = DefaultButtonType.New,
+                        Icon = "New",
+                        IsPrimary = true,
+                        Label = "Create new secret",
+                        EntityVariant = _secretVariant
+                    }
                 })
             {
 

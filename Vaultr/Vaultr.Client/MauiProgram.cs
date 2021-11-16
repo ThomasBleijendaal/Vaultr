@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebView.Maui;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +43,7 @@ public static class MauiProgram
         builder.Services.AddRapidCMSWebAssembly(config =>
         {
             config.SetCustomLoginScreen(typeof(LoginScreen));
-            // TODO: set login status
+            config.SetCustomLoginStatus(typeof(LoginStatus));
 
             config.AddPlugin<KeyVaultCollectionPlugin>();
         });

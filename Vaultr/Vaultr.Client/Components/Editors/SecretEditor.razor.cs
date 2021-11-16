@@ -6,7 +6,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
+using RapidCMS.Core.Forms;
 using RapidCMS.Core.Models.EventArgs.Mediators;
+using Vaultr.Client.Components.Panes;
 
 namespace Vaultr.Client.Components.Editors
 {
@@ -84,6 +86,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                await RecoverSecretAsync(SecretClient);
+
                 await SecretClient.SetSecretAsync(KeyName, Value);
                 Lock();
 
@@ -107,27 +111,7 @@ namespace Vaultr.Client.Components.Editors
 
                 var targetSecretClient = SecretClientsProvider.Clients[targetKeyVault];
 
-                var hasDeletedSecret = false;
-                try
-                {
-                    var deletedSecret = await targetSecretClient.GetDeletedSecretAsync(KeyName);
-                    hasDeletedSecret = deletedSecret.GetRawResponse().Status == 200;
-                }
-                catch
-                {
-
-                }
-
-                if (hasDeletedSecret)
-                {
-                    var recovery = await targetSecretClient.StartRecoverDeletedSecretAsync(KeyName);
-
-                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Recovering deleted secret.."));
-
-                    await recovery.WaitForCompletionAsync();
-
-                    Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Deleted secret recovered."));
-                }
+                await RecoverSecretAsync(targetSecretClient);
 
                 await targetSecretClient.SetSecretAsync(KeyName, secret.Value.Value);
 
@@ -161,8 +145,7 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                // TODO: change to mediator event with confirm pane
-                if (await JsRuntime.InvokeAsync<bool>("confirm", "Are you sure?"))
+                if (await Mediator.NotifyEventAsync(this, new PaneRequestEventArgs(typeof(ConfirmPane), EditContext, new ButtonContext(default, KeyVaultName))) == CrudType.Delete)
                 {
                     Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Deleting secret.."));
 
@@ -180,6 +163,31 @@ namespace Vaultr.Client.Components.Editors
             catch (Exception ex)
             {
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to delete secret: {ex.Message}"));
+            }
+        }
+
+        private async Task RecoverSecretAsync(SecretClient targetSecretClient)
+        {
+            var hasDeletedSecret = false;
+            try
+            {
+                var deletedSecret = await targetSecretClient.GetDeletedSecretAsync(KeyName);
+                hasDeletedSecret = deletedSecret.GetRawResponse().Status == 200;
+            }
+            catch
+            {
+
+            }
+
+            if (hasDeletedSecret)
+            {
+                var recovery = await targetSecretClient.StartRecoverDeletedSecretAsync(KeyName);
+
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Recovering deleted secret.."));
+
+                await recovery.WaitForCompletionAsync();
+
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Deleted secret recovered."));
             }
         }
     }

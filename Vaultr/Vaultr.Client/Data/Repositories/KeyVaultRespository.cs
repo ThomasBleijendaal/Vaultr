@@ -53,7 +53,7 @@ public class KeyVaultRespository : IRepository
             }
         }
 
-        return secrets;
+        return secrets.OrderBy(x => x.Id);
     }
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
@@ -8,7 +9,9 @@ namespace Vaultr.Client.Components.Authentication;
 
 public partial class LoginScreen
 {
-    public ConfigurationState Config { get; set; } = new ConfigurationState();
+    public IReadOnlyList<ConfigurationState> Configurations { get; set; } = null!;
+
+    public ConfigurationState NewConfig { get; set; } = new ConfigurationState();
 
     [Inject]
     public NavigationManager Navigation { get; set; } = null!;
@@ -21,18 +24,40 @@ public partial class LoginScreen
 
     protected override void OnInitialized()
     {
-        Config = ConfigurationStateProvider.GetCurrentState() ?? Config;
+        Configurations = ConfigurationStateProvider.GetConfigurations();
+
+        NewConfig = ConfigurationStateProvider.GetCurrentState() ?? NewConfig;
     }
 
     private void HandleSubmit(EditContext context)
     {
-        ConfigurationStateProvider.SetState(Config);
-
-        SecretClientsProvider.Build();
-
-        if (Config.IsValid())
+        if (NewConfig.IsValid())
         {
+            ConfigurationStateProvider.AddState(NewConfig);
+        }
+
+        NewConfig = new ConfigurationState();
+
+        StateHasChanged();
+    }
+
+    private void Remove(ConfigurationState config)
+    {
+        ConfigurationStateProvider.RemoveState(config);
+    }
+
+    private void Login(ConfigurationState config)
+    {
+        if (config.IsValid())
+        {
+            ConfigurationStateProvider.SetCurrentState(config);
+            SecretClientsProvider.Build();
+
             Navigation.NavigateTo("/", true);
+        }
+        else
+        {
+            ConfigurationStateProvider.RemoveState(config);
         }
     }
 }

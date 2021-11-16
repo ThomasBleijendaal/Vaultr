@@ -1,10 +1,17 @@
-﻿using Vaultr.Client.Core.Models;
+﻿using System.Collections.Generic;
+using Vaultr.Client.Core.Models;
 
 namespace Vaultr.Client.Core.Abstractions;
 
 public interface IConfigurationStateProvider
 {
+    IReadOnlyList<ConfigurationState> GetConfigurations(); 
+
     ConfigurationState GetCurrentState();
 
-    void SetState(ConfigurationState state);
+    void SetCurrentState(ConfigurationState? state);
+
+    void AddState(ConfigurationState state);
+
+    void RemoveState(ConfigurationState state);
 }

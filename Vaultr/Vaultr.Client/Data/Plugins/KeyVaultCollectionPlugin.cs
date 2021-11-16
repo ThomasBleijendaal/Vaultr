@@ -20,7 +20,6 @@ namespace Vaultr.Client.Data.Plugins;
 public class KeyVaultCollectionPlugin : IPlugin
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
-    private readonly IExpressionMetadata _keyVaultSecretIdExpression = new ExpressionMetadata<KeyVaultSecretEntity>("Id", x => x.Id ?? string.Empty);
     private readonly IEntityVariantSetup _secretVariant = new EntityVariantSetup("KeyVaultSecret", "AzureKeyVault", typeof(KeyVaultSecretEntity), "vaultr::secretentity");
 
     public KeyVaultCollectionPlugin(
@@ -46,7 +45,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                 CollectionRootVisibility.Visible,
                 false,
                 false,
-                _keyVaultSecretIdExpression),
+                new ExpressionMetadata<KeyVaultSecretEntity>("Id", x => x.Id ?? string.Empty)),
             EntityVariant = _secretVariant,
             Collections = new List<ITreeElementSetup>(),
             UsageType = UsageType.List,
@@ -70,10 +69,15 @@ public class KeyVaultCollectionPlugin : IPlugin
                         new List<IFieldSetup>
                         {
                             // TODO: add support for createing new secrets and for creating copies via mediator pane
-                            new ExpressionFieldSetup()
+                            new CustomPropertyFieldSetup(typeof(SecretIdLabel))
                             {
                                 Name = "Id",
-                                Expression = _keyVaultSecretIdExpression,
+                                Property = new PropertyMetadata<KeyVaultSecretEntity>(
+                                    "Id",
+                                    typeof(string),
+                                    (e) => e.Id,
+                                    (e, v) => { },
+                                    Guid.NewGuid().ToString()),
                                 Index = 0
                             }
                         }.Concat(state.KeyVaults.Select(x =>

@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Vaultr.Client.Core.Models;
 
 public class ConfigurationState
 {
-    public List<KeyVaultConfiguration> KeyVaults { get; set; } = new List<KeyVaultConfiguration> { /*new KeyVaultConfiguration()*/ };
+    public List<KeyVaultConfiguration> KeyVaults { get; set; } = new List<KeyVaultConfiguration>();
+
+    public string? Name { get; set; }
 
     public string? TenantId { get; set; }
 
@@ -15,6 +18,8 @@ public class ConfigurationState
 
     public bool IsValid()
     {
-        return KeyVaults.Count > 0 && !string.IsNullOrEmpty(TenantId);
+        return KeyVaults.Count > 0 
+            && KeyVaults.All(x => !string.IsNullOrWhiteSpace(x.Name)) 
+            && !string.IsNullOrEmpty(TenantId);
     }
 }

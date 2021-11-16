@@ -1,25 +1,41 @@
 ﻿<h4>Hi!</h4>
 
-<p>Please sign in to access the CMS.</p>
+<p>Configure Vaultr to access your KeyVaults.</p>
 
-<EditForm Model=@Config OnValidSubmit=HandleSubmit>
-    <InputText @bind-Value=Config.TenantId />
+@foreach (var config in Configurations)
+{
+    <div class="configuration" @onclick=@((e) => Login(config)) title="Login">
+        <p><strong>@config.Name</strong><br /><small>@config.TenantId</small></p>
+        <p>@(string.Join(", ", config.KeyVaults.Select(x => x.Name)))</p>
+        <p><a href="#" @onclick=@((e) => Remove(config)) @onclick:stopPropagation="true" class="danger">Remove from list</a></p>
+    </div>
+}
 
-    <hr />
 
-    <p>Key Vaults to connect to</p>
+<div class="configuration-form">
+    <EditForm Model=@NewConfig OnValidSubmit=HandleSubmit>
+        <div class="form-group">
+            <label>Profile name</label>
+            <InputText @bind-Value=NewConfig.Name class="form-control" />
+        </div>
+        <div class="form-group">
+            <label>Tenant Id</label>
+            <InputText @bind-Value=NewConfig.TenantId class="form-control" />
+        </div>
 
-    @foreach (var kv in Config.KeyVaults)
-    {
-        <InputText @bind-Value=kv.Name />
-    }
+        <div class="form-group">
+            <label>KeyVaults</label>
 
-    <hr />
+            @foreach (var kv in NewConfig.KeyVaults)
+            {
+                <InputText @bind-Value=kv.Name class="form-control" />
+            }
+        </div>
 
-    <button class="btn btn-primary" type="button" @onclick=@((e) => Config.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
+        <button class="btn btn-primary" type="button" @onclick=@((e) => NewConfig.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
 
-    <hr />
+        <hr />
 
-    <button class="btn btn-primary">Log in</button>
-</EditForm>
-
+        <button class="btn btn-primary" type="submit">Save profile</button>
+    </EditForm>
+</div>

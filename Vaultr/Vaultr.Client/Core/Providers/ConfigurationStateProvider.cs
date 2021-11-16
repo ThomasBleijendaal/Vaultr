@@ -10,31 +10,35 @@ namespace Vaultr.Client.Core.Providers;
 
 public class ConfigurationStateProvider : IConfigurationStateProvider
 {
-    private ConfigurationState? _state;
+    private List<ConfigurationState> _config;
+    private ConfigurationState? _currentState;
     private readonly string _storageFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "settings.json");
 
     public ConfigurationStateProvider()
     {
         if (File.Exists(_storageFile))
         {
-            _state = JsonConvert.DeserializeObject<List<ConfigurationState>>(File.ReadAllText(_storageFile))?.FirstOrDefault();
+            _config = JsonConvert.DeserializeObject<List<ConfigurationState>>(File.ReadAllText(_storageFile)) ?? new List<ConfigurationState>();
         }
+
+        _config ??= new List<ConfigurationState>();
     }
 
     public ConfigurationState GetCurrentState()
-        => _state ??= new ConfigurationState
+        => _currentState ?? new ConfigurationState
         {
-            KeyVaults = new List<ConfigurationState.KeyVaultConfiguration> {  new ConfigurationState.KeyVaultConfiguration()},
+            KeyVaults = new List<ConfigurationState.KeyVaultConfiguration> { new ConfigurationState.KeyVaultConfiguration() },
             TenantId = ""
-            //KeyVaults =
-            //{
-            //    new ConfigurationState.KeyVaultConfiguration { Name = "vaultr-test" },
-            //    new ConfigurationState.KeyVaultConfiguration { Name = "vaultr-prod" }
-            //},
-            //TenantId = "324bfecd-c8d2-4233-887b-c1be7fa11256"
         };
 
-    public void SetState(ConfigurationState state)
+    public void SetCurrentState(ConfigurationState? state)
+    {
+        _currentState = state;
+    }
+
+    public IReadOnlyList<ConfigurationState> GetConfigurations() => _config;
+
+    public void AddState(ConfigurationState state)
     {
         state.KeyVaults = state.KeyVaults
             .Where(x => !string.IsNullOrWhiteSpace(x.Name))
@@ -42,8 +46,18 @@ public class ConfigurationStateProvider : IConfigurationStateProvider
             .Select(x => x.First())
             .ToList();
 
-        _state = state;
+        _config.Add(state);
+        SaveConfig();
+    }
 
-        File.WriteAllText(_storageFile, JsonConvert.SerializeObject(new[] { _state }));
+    public void RemoveState(ConfigurationState state)
+    {
+        _config.Remove(state);
+        SaveConfig();
+    }
+
+    private void SaveConfig()
+    {
+        File.WriteAllText(_storageFile, JsonConvert.SerializeObject(_config));
     }
 }

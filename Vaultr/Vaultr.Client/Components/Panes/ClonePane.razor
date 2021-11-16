@@ -1,0 +1,34 @@
+﻿@inherits BaseSidePane
+
+<div class="sidepane-section">
+    <h3>Please indicate where to clone the secret to</h3>
+
+    <EditForm Model=@Clone>
+        <div class="form-group">
+            <label>Secret name</label>
+            <InputText @bind-Value=Clone.NewName class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label>Clone to</label>
+
+            @foreach (var kv in Clone.KeyVaults)
+            {
+                <div class="form-group">
+
+                    <label class="form-group-checkbox">
+                        <InputCheckbox @bind-Value=kv.ShouldClone />
+                        @kv.Name
+                    </label>
+
+                </div>
+            }
+        </div>
+
+    </EditForm>
+</div>
+
+<div class="buttonbar">
+    <button class="btn btn-danger" @onclick=@((e) => CloneAsync())>Clone</button>
+    <button class="btn btn-dark" @onclick=@((e) => ButtonClicked(CrudType.None))>Cancel</button>
+</div>

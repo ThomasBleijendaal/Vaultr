@@ -29,6 +29,8 @@ public static class MauiProgram
 
         builder.Services.AddBlazorWebView();
 
+        builder.Services.AddMemoryCache();
+
         builder.Services.AddAuthorizationCore();
 
         builder.Services.AddSingleton<SecretClientsProvider>();

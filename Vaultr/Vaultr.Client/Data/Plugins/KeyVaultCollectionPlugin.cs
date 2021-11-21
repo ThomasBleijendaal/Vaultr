@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RapidCMS.Core.Abstractions.Metadata;
 using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Abstractions.Setup;
@@ -68,7 +67,6 @@ public class KeyVaultCollectionPlugin : IPlugin
                         },
                         new List<IFieldSetup>
                         {
-                            // TODO: add support for createing new secrets and for creating copies via mediator pane
                             new CustomPropertyFieldSetup(typeof(SecretIdLabel))
                             {
                                 Name = "Id",
@@ -76,7 +74,13 @@ public class KeyVaultCollectionPlugin : IPlugin
                                     "Id",
                                     typeof(string),
                                     (e) => e.Id,
-                                    (e, v) => { },
+                                    (e, v) =>
+                                    {
+                                        e.Id = ((string?)v) ?? "";
+                                        e.KeyVaultUris = e.KeyVaultUris.ToDictionary(
+                                            x => x.Key,
+                                            x => new Uri($"http://localhost/{v}"));
+                                    },
                                     Guid.NewGuid().ToString()),
                                 Index = 0
                             }
@@ -107,6 +111,17 @@ public class KeyVaultCollectionPlugin : IPlugin
                         Icon = "New",
                         IsPrimary = true,
                         Label = "Create new secret",
+                        EntityVariant = _secretVariant
+                    },
+                    new ButtonSetup()
+                    {
+                        ButtonHandlerType = typeof(DefaultButtonActionHandler),
+                        ButtonId = "cancelnewsecret",
+                        Buttons = new List<IButtonSetup>(),
+                        DefaultButtonType = DefaultButtonType.Return,
+                        Icon = "Return",
+                        IsPrimary = false,
+                        Label = "Cancel",
                         EntityVariant = _secretVariant
                     }
                 })

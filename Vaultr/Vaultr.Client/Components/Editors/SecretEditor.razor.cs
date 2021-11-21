@@ -3,12 +3,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Forms;
 using RapidCMS.Core.Models.EventArgs.Mediators;
 using Vaultr.Client.Components.Panes;
+using Vaultr.Client.Data.Repositories;
 
 namespace Vaultr.Client.Components.Editors
 {
@@ -18,7 +20,7 @@ namespace Vaultr.Client.Components.Editors
         private bool IsDecrypted { get; set; }
         private bool IsModified { get; set; }
         private bool IsEmpty => string.IsNullOrEmpty(GetValueAsString());
-        private bool IsEncrypted => !IsEmpty && !IsDecrypted;
+        private bool IsEncrypted => EditContext.EntityState == EntityState.IsExisting && !IsEmpty && !IsDecrypted;
 
         private int KeyVaultIndex => SecretClientsProvider.Clients.Keys.ToList().IndexOf(KeyVaultName);
 
@@ -32,9 +34,13 @@ namespace Vaultr.Client.Components.Editors
 
         private SecretClient SecretClient => SecretClientsProvider.Clients[KeyVaultName];
 
+        [Inject] private SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+
         [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
 
         [Inject] private IMediator Mediator { get; set; } = null!;
+
+        [Inject] private IMemoryCache MemoryCache { get; set; } = null!;
 
         private string KeyName => new Uri(GetValueAsString()).AbsolutePath.Split('/').Last();
 
@@ -42,7 +48,7 @@ namespace Vaultr.Client.Components.Editors
         {
             return IsDecrypted
                 ? (Value ?? "")
-                : !IsEmpty
+                : !IsEmpty && EditContext.EntityState == EntityState.IsExisting
                     ? "***"
                     : "";
         }
@@ -86,6 +92,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                MemoryCache.Remove("secrets");
+
                 await RecoverSecretAsync(SecretClient);
 
                 await SecretClient.SetSecretAsync(KeyName, Value);
@@ -107,6 +115,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                MemoryCache.Remove("secrets");
+
                 var secret = await SecretClient.GetSecretAsync(KeyName);
 
                 var targetSecretClient = SecretClientsProvider.Clients[targetKeyVault];
@@ -145,6 +155,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                MemoryCache.Remove("secrets");
+
                 if (await Mediator.NotifyEventAsync(this, new PaneRequestEventArgs(typeof(ConfirmPane), EditContext, new ButtonContext(default, KeyVaultName))) == CrudType.Delete)
                 {
                     Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Deleting secret.."));

@@ -6,9 +6,7 @@ using Vaultr.Client.Core.Abstractions;
 
 namespace Vaultr.Client.Data.Repositories;
 
-// TODO: move keyvault logic to this class
-// TODO: refactor this class
-public class SecretClientsProvider
+public class SecretClientsProvider : ISecretClientsProvider
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
     private readonly Dictionary<string, SecretClient> _clients = new();

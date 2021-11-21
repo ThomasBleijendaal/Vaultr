@@ -20,7 +20,7 @@ public partial class LoginScreen
     public IConfigurationStateProvider ConfigurationStateProvider { get; set; } = null!;
 
     [Inject]
-    public SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+    public ISecretClientsProvider SecretClientsProvider { get; set; } = null!;
 
     protected override void OnInitialized()
     {

@@ -12,7 +12,7 @@
     <EnableDefaultCssItems>false</EnableDefaultCssItems>
 
     <!-- Display name -->
-    <ApplicationTitle>Vaultr.Client</ApplicationTitle>
+    <ApplicationTitle>Vaultr</ApplicationTitle>
 
     <!-- App Identifier -->
     <ApplicationId>com.companyname.Vaultr.Client</ApplicationId>

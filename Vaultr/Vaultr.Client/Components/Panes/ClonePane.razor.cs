@@ -13,7 +13,7 @@ namespace Vaultr.Client.Components.Panes
     public partial class ClonePane
     {
         [Inject]
-        private SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+        private ISecretClientsProvider SecretClientsProvider { get; set; } = null!;
 
         [Inject]
         private IMediator Mediator { get; set; } = null!;
@@ -27,7 +27,7 @@ namespace Vaultr.Client.Components.Panes
             if (EditContext.Entity is KeyVaultSecretEntity secret)
             {
                 _secret = secret;
-                Clone.NewName = secret.Id;
+                Clone.NewName = secret.Id ?? "";
 
                 foreach (var kv in secret.KeyVaultUris)
                 {

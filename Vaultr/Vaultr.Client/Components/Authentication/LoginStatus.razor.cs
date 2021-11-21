@@ -13,7 +13,7 @@ public partial class LoginStatus
     public IConfigurationStateProvider ConfigurationStateProvider { get; set; } = null!;
 
     [Inject]
-    public SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+    public ISecretClientsProvider SecretClientsProvider { get; set; } = null!;
 
     private void Logout()
     {

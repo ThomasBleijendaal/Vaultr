@@ -93,7 +93,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                                     x.Name,
                                     typeof(string),
                                     (e) => e.KeyVaultUris.TryGetValue(x.Name, out var uri) ? uri.ToString() : null,
-                                    (e, v) => e.Values[x.Name] = (string?)v ?? "",
+                                    (e, v) =>  { },
                                     Guid.NewGuid().ToString())
                             })
                         ).ToList(),

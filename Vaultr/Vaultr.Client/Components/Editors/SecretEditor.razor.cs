@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Azure.Security.KeyVault.Secrets;
 using Microsoft.AspNetCore.Components;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
@@ -22,27 +19,21 @@ namespace Vaultr.Client.Components.Editors
         private bool IsEmpty => string.IsNullOrEmpty(GetValueAsString());
         private bool IsEncrypted => EditContext.EntityState == EntityState.IsExisting && !IsEmpty && !IsDecrypted;
 
-        private int KeyVaultIndex => SecretClientsProvider.Clients.Keys.ToList().IndexOf(KeyVaultName);
-
-        private bool CanPromote => !IsEmpty && KeyVaultIndex < SecretClientsProvider.Clients.Count - 1;
-        private bool CanDemote => !IsEmpty && KeyVaultIndex > 0;
+        private bool CanPromote => !IsEmpty && SecretsProvider.CanPromote(KeyVaultName);
+        private bool CanDemote => !IsEmpty && SecretsProvider.CanDemote(KeyVaultName);
 
         private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
 
-        private string? NextKeyVaultName => CanPromote ? SecretClientsProvider.Clients.Keys.ElementAt(KeyVaultIndex + 1) : null;
-        private string? PreviousKeyVaultName => CanDemote ? SecretClientsProvider.Clients.Keys.ElementAt(KeyVaultIndex - 1) : null;
+        private string? NextKeyVaultName => !CanPromote ? null : SecretsProvider.NextKeyVaultName(KeyVaultName);
+        private string? PreviousKeyVaultName => !CanDemote ? null : SecretsProvider.PreviousKeyVaultName(KeyVaultName);
 
-        private SecretClient SecretClient => SecretClientsProvider.Clients[KeyVaultName];
-
-        [Inject] private SecretClientsProvider SecretClientsProvider { get; set; } = null!;
+        [Inject] private ISecretsProvider SecretsProvider { get; set; } = null!;
 
         [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
 
         [Inject] private IMediator Mediator { get; set; } = null!;
 
-        [Inject] private IMemoryCache MemoryCache { get; set; } = null!;
-
-        private string KeyName => new Uri(GetValueAsString()).AbsolutePath.Split('/').Last();
+        private string KeyName => EditContext.Entity.Id ?? "";
 
         private string GetValue()
         {
@@ -66,10 +57,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                var secret = await SecretClient.GetSecretAsync(KeyName);
-
                 IsDecrypted = true;
-                Value = secret.Value.Value;
+                Value = await SecretsProvider.GetSecretValueAsync(KeyVaultName, KeyName);
 
                 StateHasChanged();
             }
@@ -92,11 +81,10 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                MemoryCache.Remove("secrets");
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Saving secret.."));
 
-                await RecoverSecretAsync(SecretClient);
+                await SecretsProvider.SaveSecretValueAsync(KeyVaultName, KeyName, Value ?? "");
 
-                await SecretClient.SetSecretAsync(KeyName, Value);
                 Lock();
 
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret saved!"));
@@ -115,15 +103,9 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                MemoryCache.Remove("secrets");
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Copying secret.."));
 
-                var secret = await SecretClient.GetSecretAsync(KeyName);
-
-                var targetSecretClient = SecretClientsProvider.Clients[targetKeyVault];
-
-                await RecoverSecretAsync(targetSecretClient);
-
-                await targetSecretClient.SetSecretAsync(KeyName, secret.Value.Value);
+                await SecretsProvider.CopySecretValueAsync(KeyVaultName, KeyName, targetKeyVault);
 
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied!"));
                 Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
@@ -140,8 +122,10 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                var secret = await SecretClient.GetSecretAsync(KeyName, Value);
-                await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", secret.Value.Value);
+                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Getting secret.."));
+
+                var secretValue = await SecretsProvider.GetSecretValueAsync(KeyVaultName, KeyName);
+                await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", secretValue);
 
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied to clipboard!"));
             }
@@ -155,16 +139,13 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
-                MemoryCache.Remove("secrets");
-
                 if (await Mediator.NotifyEventAsync(this, new PaneRequestEventArgs(typeof(ConfirmPane), EditContext, new ButtonContext(default, KeyVaultName))) == CrudType.Delete)
                 {
                     Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Deleting secret.."));
 
                     SetValue(null!);
 
-                    var deletion = await SecretClient.StartDeleteSecretAsync(KeyName);
-                    await deletion.WaitForCompletionAsync();
+                    await SecretsProvider.DeleteSecretAsync(KeyVaultName, KeyName);
 
                     Lock();
 
@@ -175,31 +156,6 @@ namespace Vaultr.Client.Components.Editors
             catch (Exception ex)
             {
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to delete secret: {ex.Message}"));
-            }
-        }
-
-        private async Task RecoverSecretAsync(SecretClient targetSecretClient)
-        {
-            var hasDeletedSecret = false;
-            try
-            {
-                var deletedSecret = await targetSecretClient.GetDeletedSecretAsync(KeyName);
-                hasDeletedSecret = deletedSecret.GetRawResponse().Status == 200;
-            }
-            catch
-            {
-
-            }
-
-            if (hasDeletedSecret)
-            {
-                var recovery = await targetSecretClient.StartRecoverDeletedSecretAsync(KeyName);
-
-                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Recovering deleted secret.."));
-
-                await recovery.WaitForCompletionAsync();
-
-                Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Deleted secret recovered."));
             }
         }
     }

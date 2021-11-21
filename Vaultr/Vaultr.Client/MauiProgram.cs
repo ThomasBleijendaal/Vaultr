@@ -33,7 +33,8 @@ public static class MauiProgram
 
         builder.Services.AddAuthorizationCore();
 
-        builder.Services.AddSingleton<SecretClientsProvider>();
+        builder.Services.AddSingleton<ISecretClientsProvider, SecretClientsProvider>();
+        builder.Services.AddSingleton<ISecretsProvider, SecretsProvider>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, AllowAllAuthorizationHandler>();
         builder.Services.AddSingleton<AuthenticationStateProvider, ClientSpecifiedAuthenticationStateProvider>();

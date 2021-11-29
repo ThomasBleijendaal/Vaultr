@@ -50,7 +50,7 @@ public class KeyVaultCollectionPlugin : IPlugin
             UsageType = UsageType.List,
             ListEditor = new ListSetup(
                 20,
-                false,
+                true,
                 false,
                 ListType.Table,
                 EmptyVariantColumnVisibility.Collapse,

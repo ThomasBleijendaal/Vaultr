@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using RapidCMS.Core.Abstractions.Data;
 using RapidCMS.Core.Abstractions.Forms;
@@ -20,7 +21,9 @@ public class KeyVaultRespository : IRepository
 
     public Task DeleteAsync(string id, IViewContext viewContext) => throw new NotImplementedException();
 
-    public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view) => await _secretsProvider.GetAllSecretsAsync();
+    public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view) 
+        => (await _secretsProvider.GetAllSecretsAsync())
+            .Where(x => view.SearchTerm == null || (x.Id != null && x.Id.Contains(view.SearchTerm)));
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view) => throw new NotImplementedException();
 

@@ -33,15 +33,15 @@ public static class MauiProgram
 
         builder.Services.AddAuthorizationCore();
 
-        builder.Services.AddSingleton<ISecretClientsProvider, SecretClientsProvider>();
-        builder.Services.AddSingleton<ISecretsProvider, SecretsProvider>();
+        builder.Services.AddScoped<ISecretClientsProvider, SecretClientsProvider>();
+        builder.Services.AddScoped<ISecretsProvider, SecretsProvider>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, AllowAllAuthorizationHandler>();
         builder.Services.AddSingleton<AuthenticationStateProvider, ClientSpecifiedAuthenticationStateProvider>();
         builder.Services.AddSingleton<IConfigurationStateProvider, ConfigurationStateProvider>();
 
         builder.Services.AddSingleton<IPlugin, KeyVaultCollectionPlugin>();
-        builder.Services.AddSingleton<KeyVaultRespository>();
+        builder.Services.AddScoped<KeyVaultRespository>();
 
         builder.Services.AddRapidCMSWebAssembly(config =>
         {

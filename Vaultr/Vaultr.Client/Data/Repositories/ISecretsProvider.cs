@@ -18,8 +18,8 @@ public interface ISecretsProvider
 
     Task DeleteSecretAsync(string keyVaultName, string keyName);
 
-    bool CanPromote(string keyVaultName);
-    bool CanDemote(string keyVaultName);
+    bool? CanPromote(string keyVaultName);
+    bool? CanDemote(string keyVaultName);
 
     string? NextKeyVaultName(string keyVaultName);
     string? PreviousKeyVaultName(string keyVaultName);

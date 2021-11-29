@@ -27,11 +27,11 @@ public class SecretsProvider : ISecretsProvider
         _initTask = RefreshSecretCacheAsync();
     }
 
-    public bool CanPromote(string keyVaultName)
-        => GetKeyVaultIndex(keyVaultName) < _secretClientsProvider.Clients.Count - 1;
+    public bool? CanPromote(string keyVaultName)
+        => GetKeyVaultIndex(keyVaultName) < _secretClientsProvider.Clients.Count - 1 ? true : null;
 
-    public bool CanDemote(string keyVaultName)
-        => GetKeyVaultIndex(keyVaultName) > 0;
+    public bool? CanDemote(string keyVaultName)
+        => GetKeyVaultIndex(keyVaultName) > 0 ? true : null;
 
     public async Task CopySecretValueAsync(string keyVaultName, string keyName, string targetKeyVaultName) 
         => await SaveSecretAsync(targetKeyVaultName, keyName, await GetSecretValueAsync(keyVaultName, keyName));

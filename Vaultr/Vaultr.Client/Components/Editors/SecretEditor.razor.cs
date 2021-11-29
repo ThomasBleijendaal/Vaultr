@@ -19,13 +19,13 @@ namespace Vaultr.Client.Components.Editors
         private bool IsEmpty => string.IsNullOrEmpty(GetValueAsString());
         private bool IsEncrypted => EditContext.EntityState == EntityState.IsExisting && !IsEmpty && !IsDecrypted;
 
-        private bool CanPromote => !IsEmpty && SecretsProvider.CanPromote(KeyVaultName);
-        private bool CanDemote => !IsEmpty && SecretsProvider.CanDemote(KeyVaultName);
+        private bool? CanPromote => SecretsProvider.CanPromote(KeyVaultName) is bool can ? can && !IsEmpty : null;
+        private bool? CanDemote => SecretsProvider.CanDemote(KeyVaultName) is bool can ? can && !IsEmpty : null;
 
         private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
 
-        private string? NextKeyVaultName => !CanPromote ? null : SecretsProvider.NextKeyVaultName(KeyVaultName);
-        private string? PreviousKeyVaultName => !CanDemote ? null : SecretsProvider.PreviousKeyVaultName(KeyVaultName);
+        private string? NextKeyVaultName => CanPromote == true ? SecretsProvider.NextKeyVaultName(KeyVaultName) : null;
+        private string? PreviousKeyVaultName => CanDemote == true ? SecretsProvider.PreviousKeyVaultName(KeyVaultName) : null;
 
         [Inject] private ISecretsProvider SecretsProvider { get; set; } = null!;
 

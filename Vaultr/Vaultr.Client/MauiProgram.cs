@@ -46,6 +46,8 @@ public static class MauiProgram
 
         builder.Services.AddRapidCMSWebAssembly(config =>
         {
+            config.SetSiteName("Vaultr");
+
             config.SetCustomLoginScreen(typeof(LoginScreen));
             config.SetCustomLoginStatus(typeof(LoginStatus));
 

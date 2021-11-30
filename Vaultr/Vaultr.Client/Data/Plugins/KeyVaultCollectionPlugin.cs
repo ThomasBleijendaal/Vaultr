@@ -8,6 +8,7 @@ using RapidCMS.Core.Abstractions.Setup;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Handlers;
 using RapidCMS.Core.Models.Setup;
+using Vaultr.Client.Components.Buttons;
 using Vaultr.Client.Components.Editors;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Data.Metadata;
@@ -123,7 +124,19 @@ public class KeyVaultCollectionPlugin : IPlugin
                         IsPrimary = false,
                         Label = "Cancel",
                         EntityVariant = _secretVariant
-                    }
+                    },
+                    new ButtonSetup()
+                    {
+                        ButtonHandlerType = typeof(DefaultButtonActionHandler),
+                        ButtonId = "dangermode",
+                        Buttons = new List<IButtonSetup>(),
+                        DefaultButtonType = DefaultButtonType.New,
+                        Icon = "Section",
+                        IsPrimary = true,
+                        Label = "Enable danger mode",
+                        EntityVariant = _secretVariant,
+                        CustomType = typeof(DangerModeButton)
+                    },
                 })
             {
 

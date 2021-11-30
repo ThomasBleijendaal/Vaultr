@@ -7,6 +7,7 @@ using RapidCMS.Core.Enums;
 using RapidCMS.Core.Forms;
 using RapidCMS.Core.Models.EventArgs.Mediators;
 using Vaultr.Client.Components.Panes;
+using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Data.Repositories;
 
 namespace Vaultr.Client.Components.Editors
@@ -32,6 +33,8 @@ namespace Vaultr.Client.Components.Editors
         [Inject] private IJSRuntime JsRuntime { get; set; } = null!;
 
         [Inject] private IMediator Mediator { get; set; } = null!;
+
+        [Inject] private IDangerModeProvider DangerModeProvider { get; set; } = null!;
 
         private string KeyName => EditContext.Entity.Id ?? "";
 

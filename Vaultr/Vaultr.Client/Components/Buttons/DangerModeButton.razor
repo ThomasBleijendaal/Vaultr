@@ -1,0 +1,27 @@
+﻿@inherits BaseButton
+@inject IDangerModeProvider DangerModeProvider;
+
+<div class="btn @(!DangerModeProvider.IsEnabled ? "btn-danger" : "btn-danger btn-danger-mode-enabled")" @onclick=Toggle>
+    @if (DangerModeProvider.IsEnabled)
+    {
+        <text>Danger Mode&trade; Enabled</text>
+    }
+    else
+    {
+        <text>Enable Danger Mode&trade;</text>
+    }
+</div>
+
+@code {
+    private void Toggle(MouseEventArgs args)
+    {
+        if (DangerModeProvider.IsEnabled)
+        {
+            DangerModeProvider.Disable();
+        }
+        else
+        {
+            DangerModeProvider.Enable();
+        }
+    }
+}

@@ -35,6 +35,7 @@ public static class MauiProgram
 
         builder.Services.AddScoped<ISecretClientsProvider, SecretClientsProvider>();
         builder.Services.AddScoped<ISecretsProvider, SecretsProvider>();
+        builder.Services.AddScoped<IDangerModeProvider, DangerModeProvider>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, AllowAllAuthorizationHandler>();
         builder.Services.AddSingleton<AuthenticationStateProvider, ClientSpecifiedAuthenticationStateProvider>();

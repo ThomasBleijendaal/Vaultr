@@ -29,6 +29,23 @@
         input + input {
             margin-top: .05rem;
         }
+        .btn-danger-mode-enabled {
+            animation: blink 1s ease infinite;
+        }
+
+        @keyframes blink {
+            0% {
+                background-color: #ff0000;
+            }
+
+            50% {
+                background-color: #ffffff;
+            }
+
+            100% {
+                background-color: #ff0000;
+            }
+        }
     </style>
 </head>
 

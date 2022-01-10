@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-windows*/**/Vaultr.Client*.msix
+          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/**/Vaultr.Client*.msix
 
 # MAUI iOS Build
   # build-ios:
@@ -140,4 +140,4 @@ jobs:
         uses: actions/upload-artifact@v2.3.1
         with:
           name: macos-ci-build
-          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-maccatalyst/**/*.app/
+          path: Vaultr/Vaultr.Client/bin/Release/net6.0-maccatalyst/**/*.app/

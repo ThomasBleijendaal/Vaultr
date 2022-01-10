@@ -13,7 +13,7 @@ namespace Vaultr.Client.Components.Panes
     public partial class ClonePane
     {
         [Inject]
-        private ISecretClientsProvider SecretClientsProvider { get; set; } = null!;
+        private ISecretsProvider SecretsProvider { get; set; } = null!;
 
         [Inject]
         private IMediator Mediator { get; set; } = null!;
@@ -48,14 +48,15 @@ namespace Vaultr.Client.Components.Panes
             {
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Cloning secret to {kv.Name}.."));
 
-                var client = SecretClientsProvider.Clients[kv.Name];
-
-                var secret = await client.GetSecretAsync(_secret.Id);
-
-                await client.SetSecretAsync(Clone.NewName, secret.Value.Value);
+                await SecretsProvider.SaveSecretValueAsync(
+                    kv.Name,
+                    Clone.NewName,
+                    await SecretsProvider.GetSecretValueAsync(kv.Name, _secret.Id!));
 
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, $"Cloned secret to {kv.Name}!"));
             }
+
+            SecretsProvider.ClearCache();
 
             ButtonClicked(CrudType.Refresh);
         }

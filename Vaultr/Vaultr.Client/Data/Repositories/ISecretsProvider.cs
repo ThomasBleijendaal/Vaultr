@@ -8,6 +8,8 @@ public interface ISecretsProvider
 {
     KeyVaultSecretEntity GetEmptySecret();
 
+    void ClearCache();
+
     Task<IReadOnlyList<KeyVaultSecretEntity>> GetAllSecretsAsync();
 
     Task<string> GetSecretValueAsync(string keyVaultName, string keyName);

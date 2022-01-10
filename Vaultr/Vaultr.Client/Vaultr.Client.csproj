@@ -28,6 +28,7 @@
     <SupportedOSPlatformVersion Condition="'$(TargetFramework)' == 'net6.0-android'">21.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$(TargetFramework.Contains('-windows'))">10.0.17763.0</SupportedOSPlatformVersion>
     <TargetPlatformMinVersion Condition="$(TargetFramework.Contains('-windows'))">10.0.17763.0</TargetPlatformMinVersion>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -60,7 +61,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="RapidCMS.UI" Version="4.2.5-preview" />
+    <PackageReference Include="RapidCMS.UI" Version="4.3.0-preview-2" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.2.0" />
   </ItemGroup>

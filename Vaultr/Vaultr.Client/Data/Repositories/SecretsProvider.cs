@@ -16,7 +16,7 @@ public class SecretsProvider : ISecretsProvider
     private readonly IMediator _mediator;
 
     private List<KeyVaultSecretEntity> _secrets = new();
-    private readonly Task _initTask;
+    private Task _initTask;
 
     public SecretsProvider(
         ISecretClientsProvider secretClientsProvider,
@@ -27,14 +27,22 @@ public class SecretsProvider : ISecretsProvider
         _initTask = RefreshSecretCacheAsync();
     }
 
+    public void ClearCache()
+    {
+        _secrets.Clear();
+        _initTask = RefreshSecretCacheAsync();
+    }
+
     public bool? CanPromote(string keyVaultName)
         => GetKeyVaultIndex(keyVaultName) < _secretClientsProvider.Clients.Count - 1 ? true : null;
 
     public bool? CanDemote(string keyVaultName)
         => GetKeyVaultIndex(keyVaultName) > 0 ? true : null;
 
-    public async Task CopySecretValueAsync(string keyVaultName, string keyName, string targetKeyVaultName) 
-        => await SaveSecretAsync(targetKeyVaultName, keyName, await GetSecretValueAsync(keyVaultName, keyName));
+    public async Task CopySecretValueAsync(string keyVaultName, string keyName, string targetKeyVaultName)
+    {
+        await SaveSecretAsync(targetKeyVaultName, keyName, await GetSecretValueAsync(keyVaultName, keyName));
+    }
 
     public async Task DeleteSecretAsync(string keyVaultName, string keyName)
     {

@@ -14,39 +14,39 @@ env:
 
 jobs:
 # MAUI Android Build
-  build-android:
-    runs-on: windows-2022
-    name: Android Build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # build-android:
+  #   runs-on: windows-2022
+  #   name: Android Build
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
 
-      - name: Setup .NET 6
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
-          include-prerelease: true
+  #     - name: Setup .NET 6
+  #       uses: actions/setup-dotnet@v1
+  #       with:
+  #         dotnet-version: 6.0.x
+  #         include-prerelease: true
           
-      - uses: actions/setup-java@v2
-        with:
-          distribution: 'microsoft'
-          java-version: '11'
+  #     - uses: actions/setup-java@v2
+  #       with:
+  #         distribution: 'microsoft'
+  #         java-version: '11'
 
-      - name: Install MAUI Workloads
-        run: |
-          dotnet workload install android --ignore-failed-sources
-          dotnet workload install maui --ignore-failed-sources
-      - name: Restore Dependencies
-        run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
+  #     - name: Install MAUI Workloads
+  #       run: |
+  #         dotnet workload install android --ignore-failed-sources
+  #         dotnet workload install maui --ignore-failed-sources
+  #     - name: Restore Dependencies
+  #       run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
-      - name: Build MAUI Android
-        run: dotnet build Vaultr/Vaultr.Client/Vaultr.Client.csproj -c Release -f net6.0-android --no-restore
+  #     - name: Build MAUI Android
+  #       run: dotnet build Vaultr/Vaultr.Client/Vaultr.Client.csproj -c Release -f net6.0-android --no-restore
 
-      - name: Upload Android Artifact
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: android-ci-build
-          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-android/*Signed.a*
+  #     - name: Upload Android Artifact
+  #       uses: actions/upload-artifact@v2.3.1
+  #       with:
+  #         name: android-ci-build
+  #         path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-android/*Signed.a*
 
 # MAUI Windows Build
   build-windows:
@@ -80,37 +80,37 @@ jobs:
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-windows*/**/MauiBeach*.msix
+          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-windows*/**/Vaultr.Client*.msix
 
 # MAUI iOS Build
-  build-ios:
-    runs-on: macos-11
-    name: iOS Build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+  # build-ios:
+  #   runs-on: macos-11
+  #   name: iOS Build
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
 
-      - name: Setup .NET 6
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
-          include-prerelease: true
+  #     - name: Setup .NET 6
+  #       uses: actions/setup-dotnet@v1
+  #       with:
+  #         dotnet-version: 6.0.x
+  #         include-prerelease: true
 
-      - name: Install MAUI Workloads
-        run: |
-          dotnet workload install ios --ignore-failed-sources
-          dotnet workload install maui --ignore-failed-sources
-      - name: Restore Dependencies
-        run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
+  #     - name: Install MAUI Workloads
+  #       run: |
+  #         dotnet workload install ios --ignore-failed-sources
+  #         dotnet workload install maui --ignore-failed-sources
+  #     - name: Restore Dependencies
+  #       run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
-      - name: Build MAUI iOS
-        run: dotnet build Vaultr/Vaultr.Client/Vaultr.Client.csproj -c Release -f net6.0-ios --no-restore
+  #     - name: Build MAUI iOS
+  #       run: dotnet build Vaultr/Vaultr.Client/Vaultr.Client.csproj -c Release -f net6.0-ios --no-restore
 
-      - name: Upload iOS Artifact
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: ios-ci-build
-          path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-ios/**/*.app/
+  #     - name: Upload iOS Artifact
+  #       uses: actions/upload-artifact@v2.3.1
+  #       with:
+  #         name: ios-ci-build
+  #         path: Vaultr/Vaultr.Client/Vaultr.Client/bin/Release/net6.0-ios/**/*.app/
 
 # MAUI MacCatalyst Build
   build-mac:

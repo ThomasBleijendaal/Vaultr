@@ -3,12 +3,6 @@ name: CI Build
 on:
   push:
     branches: [ main ]
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.gitignore'
-      - '**/*.gitattributes'
-  pull_request:
-    branches: [ master ]
   workflow_dispatch:
 permissions:
   contents: read

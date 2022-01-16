@@ -38,7 +38,7 @@ public class KeyVaultCollectionPlugin : IPlugin
             return Task.FromResult(default(IResolvedSetup<CollectionSetup>));
         }
 
-        var collection = new CollectionSetup("AzureKeyVault", "RedOrange10", "Secrets", "vaultr::secrets", "vaultr::secrets")
+        var collection = new CollectionSetup("AzureKeyVault", "Gray40", "Secrets", "vaultr::secrets", "vaultr::secrets")
         {
             TreeView = new TreeViewSetup(
                 EntityVisibilty.Hidden,

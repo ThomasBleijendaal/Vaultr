@@ -33,10 +33,10 @@
 
   <ItemGroup>
     <!-- App Icon -->
-    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" Color="#512BD4" />
+    <MauiIcon Include="Resources\appicon.svg" ForegroundFile="Resources\appiconfg.svg" />
 
     <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\appiconfg.svg" Color="#512BD4" />
+    <MauiSplashScreen Include="Resources\appiconfg.svg" />
 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
@@ -59,6 +59,7 @@
   <ItemGroup>
     <Content Remove="Properties\launchSettings.json" />
   </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="RapidCMS.UI" Version="4.3.0-preview-2" />

@@ -23,7 +23,7 @@ public class KeyVaultRespository : IRepository
 
     public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view) 
         => (await _secretsProvider.GetAllSecretsAsync())
-            .Where(x => view.SearchTerm == null || (x.Id != null && x.Id.Contains(view.SearchTerm)));
+            .Where(x => view.SearchTerm == null || (x.Id != null && x.Id.Contains(view.SearchTerm, StringComparison.InvariantCultureIgnoreCase)));
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view) => throw new NotImplementedException();
 

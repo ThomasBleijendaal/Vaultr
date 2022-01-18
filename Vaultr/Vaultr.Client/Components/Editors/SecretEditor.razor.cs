@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
@@ -36,16 +37,34 @@ namespace Vaultr.Client.Components.Editors
 
         [Inject] private IDangerModeProvider DangerModeProvider { get; set; } = null!;
 
+        [Inject] private IMemoryCache MemoryCache { get; set; } = null!;
+
         private string KeyName => EditContext.Entity.Id ?? "";
 
-        private string GetValue()
+        protected override void OnParametersSet()
         {
-            return IsDecrypted
+            // survive refresh when a secret for another keyvault is saved
+            if (!string.IsNullOrWhiteSpace(EditContext.Entity.Id) && EditContext.EntityState == EntityState.IsExisting)
+            {
+                Value = ((string?)MemoryCache.Get(CacheKey())) ?? "";
+
+                if (!string.IsNullOrEmpty(Value))
+                {
+                    IsDecrypted = true;
+                    IsModified = true;
+
+                    // refresh the lease
+                    MemoryCache.Set(CacheKey(), Value, TimeSpan.FromSeconds(60));
+                }
+            }
+        }
+
+        private string GetValue()
+            => IsDecrypted
                 ? (Value ?? "")
                 : !IsEmpty && EditContext.EntityState == EntityState.IsExisting
                     ? "***"
                     : "";
-        }
 
         private void SetValue(string value)
         {
@@ -53,6 +72,11 @@ namespace Vaultr.Client.Components.Editors
             {
                 IsModified = true;
                 Value = value;
+
+                if (!string.IsNullOrWhiteSpace(EditContext.Entity.Id))
+                {
+                    MemoryCache.Set(CacheKey(), value, TimeSpan.FromSeconds(60));
+                }
             }
         }
 
@@ -62,6 +86,8 @@ namespace Vaultr.Client.Components.Editors
             {
                 IsDecrypted = true;
                 Value = await SecretsProvider.GetSecretValueAsync(KeyVaultName, KeyName);
+
+                MemoryCache.Remove(CacheKey());
 
                 StateHasChanged();
             }
@@ -77,6 +103,8 @@ namespace Vaultr.Client.Components.Editors
             IsDecrypted = false;
             IsModified = false;
 
+            MemoryCache.Remove(CacheKey());
+
             StateHasChanged();
         }
 
@@ -84,6 +112,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                MemoryCache.Remove(CacheKey());
+
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Saving secret.."));
 
                 await SecretsProvider.SaveSecretValueAsync(KeyVaultName, KeyName, Value ?? "");
@@ -142,6 +172,8 @@ namespace Vaultr.Client.Components.Editors
         {
             try
             {
+                MemoryCache.Remove(CacheKey());
+
                 if (await Mediator.NotifyEventAsync(this, new PaneRequestEventArgs(typeof(ConfirmPane), EditContext, new ButtonContext(default, KeyVaultName))) == CrudType.Delete)
                 {
                     Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Deleting secret.."));
@@ -161,5 +193,7 @@ namespace Vaultr.Client.Components.Editors
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to delete secret: {ex.Message}"));
             }
         }
+
+        private string CacheKey() => $"{EditContext.Entity.Id}{KeyVaultName}";
     }
 }

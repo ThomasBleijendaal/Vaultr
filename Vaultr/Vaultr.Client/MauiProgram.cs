@@ -6,6 +6,7 @@ using Microsoft.Maui.Controls.Hosting;
 using Microsoft.Maui.Hosting;
 using RapidCMS.Core.Abstractions.Plugins;
 using Vaultr.Client.Components.Authentication;
+using Vaultr.Client.Core;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Handlers;
 using Vaultr.Client.Core.Providers;
@@ -43,6 +44,7 @@ public static class MauiProgram
 
         builder.Services.AddSingleton<IPlugin, KeyVaultCollectionPlugin>();
         builder.Services.AddScoped<KeyVaultRespository>();
+        builder.Services.AddSingleton<NotificationService>();
 
         builder.Services.AddRapidCMSWebAssembly(config =>
         {

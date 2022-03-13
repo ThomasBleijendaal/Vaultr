@@ -8,6 +8,12 @@
     <base href="/" />
     <link href="_content/rapidcms.ui/css/site.css" rel="stylesheet" />
     <style>
+        .sidebar {
+            display: none;
+        }
+        .main {
+            margin-left: 0px;
+        }
         .navbar, .nav-item a.active, .nav-item a:hover {
             background-color: rgb(127, 186, 0) !important;
         }
@@ -45,6 +51,10 @@
             bottom: 25px;
             top: unset;
             right: unset;
+        }
+
+        table td:first-child{
+            width: 40%;
         }
 
         @keyframes blink {

@@ -53,6 +53,8 @@ public static class MauiProgram
             config.SetCustomLoginScreen(typeof(LoginScreen));
             config.SetCustomLoginStatus(typeof(LoginStatus));
 
+            config.Dashboard.AddSection("vaultr::secrets", edit: true);
+
             config.AddPlugin<KeyVaultCollectionPlugin>();
         });
 

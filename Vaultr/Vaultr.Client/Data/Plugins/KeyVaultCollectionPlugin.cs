@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
-using RapidCMS.Core.Abstractions.Setup;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Handlers;
 using RapidCMS.Core.Models.Setup;
@@ -20,7 +19,7 @@ namespace Vaultr.Client.Data.Plugins;
 public class KeyVaultCollectionPlugin : IPlugin
 {
     private readonly IConfigurationStateProvider _configurationStateProvider;
-    private readonly IEntityVariantSetup _secretVariant = new EntityVariantSetup("KeyVaultSecret", "AzureKeyVault", typeof(KeyVaultSecretEntity), "vaultr::secretentity");
+    private readonly EntityVariantSetup _secretVariant = new EntityVariantSetup("KeyVaultSecret", "AzureKeyVault", typeof(KeyVaultSecretEntity), "vaultr::secretentity");
 
     public KeyVaultCollectionPlugin(
         IConfigurationStateProvider configurationStateProvider)
@@ -47,7 +46,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                 false,
                 new ExpressionMetadata<KeyVaultSecretEntity>("Id", x => x.Id ?? string.Empty)),
             EntityVariant = _secretVariant,
-            Collections = new List<ITreeElementSetup>(),
+            Collections = new List<TreeElementSetup>(),
             UsageType = UsageType.List,
             ListEditor = new ListSetup(
                 20,
@@ -55,18 +54,18 @@ public class KeyVaultCollectionPlugin : IPlugin
                 false,
                 ListType.Table,
                 EmptyVariantColumnVisibility.Collapse,
-                new List<IPaneSetup>
+                new List<PaneSetup>
                 {
                     new PaneSetup(
                         default,
                         default,
                         (m, s) => true,
                         typeof(KeyVaultSecretEntity),
-                        new List<IButtonSetup>
+                        new List<ButtonSetup>
                         {
 
                         },
-                        new List<IFieldSetup>
+                        new List<FieldSetup>
                         {
                             new CustomPropertyFieldSetup(typeof(SecretIdLabel))
                             {
@@ -98,16 +97,16 @@ public class KeyVaultCollectionPlugin : IPlugin
                                     Guid.NewGuid().ToString())
                             })
                         ).ToList(),
-                        new List<ISubCollectionListSetup>(),
-                        new List<IRelatedCollectionListSetup>())
+                        new List<SubCollectionListSetup>(),
+                        new List<RelatedCollectionListSetup>())
                 },
-                new List<IButtonSetup>
+                new List<ButtonSetup>
                 {
                     new ButtonSetup()
                     {
                         ButtonHandlerType = typeof(DefaultButtonActionHandler),
                         ButtonId = "newsecret",
-                        Buttons = new List<IButtonSetup>(),
+                        Buttons = new List<ButtonSetup>(),
                         DefaultButtonType = DefaultButtonType.New,
                         Icon = "New",
                         IsPrimary = true,
@@ -118,7 +117,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                     {
                         ButtonHandlerType = typeof(DefaultButtonActionHandler),
                         ButtonId = "cancelnewsecret",
-                        Buttons = new List<IButtonSetup>(),
+                        Buttons = new List<ButtonSetup>(),
                         DefaultButtonType = DefaultButtonType.Return,
                         Icon = "Return",
                         IsPrimary = false,
@@ -129,7 +128,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                     {
                         ButtonHandlerType = typeof(DefaultButtonActionHandler),
                         ButtonId = "dangermode",
-                        Buttons = new List<IButtonSetup>(),
+                        Buttons = new List<ButtonSetup>(),
                         DefaultButtonType = DefaultButtonType.New,
                         Icon = "Section",
                         IsPrimary = true,
@@ -148,9 +147,9 @@ public class KeyVaultCollectionPlugin : IPlugin
 
     public Type? GetRepositoryType(string collectionAlias) => typeof(KeyVaultRespository);
 
-    public Task<IEnumerable<ITreeElementSetup>> GetTreeElementsAsync()
-        => Task.FromResult<IEnumerable<ITreeElementSetup>>(
-            new ITreeElementSetup[]
+    public Task<IEnumerable<TreeElementSetup>> GetTreeElementsAsync()
+        => Task.FromResult<IEnumerable<TreeElementSetup>>(
+            new TreeElementSetup[]
             {
                 new TreeElementSetup("vaultr::secrets", "KeyVault Secrets", PageType.Collection)
             });

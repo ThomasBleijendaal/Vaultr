@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using RapidCMS.Core.Abstractions.Data;
 using RapidCMS.Core.Abstractions.Forms;
 using RapidCMS.Core.Abstractions.Repositories;
+using IView = RapidCMS.Core.Abstractions.Data.IView;
 
 namespace Vaultr.Client.Data.Repositories;
 

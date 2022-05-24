@@ -25,7 +25,7 @@ namespace Vaultr.Client.WinUI
         /// </summary>
         public App()
         { 
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         protected override MauiApp CreateMauiApp()
@@ -41,20 +41,20 @@ namespace Vaultr.Client.WinUI
         {
             base.OnLaunched(args);
            
-            Microsoft.Maui.Essentials.Platform.OnLaunched(args);
+            //Microsoft.Maui.Essentials.Platform.OnLaunched(args);
 
-            var currentWindow = Application.Windows[0].Handler?.NativeView;
+            //var currentWindow = Application.Windows[0].Handler?.NativeView;
 
-            var _windowHandle = WindowNative.GetWindowHandle(currentWindow);
-            var windowId = Win32Interop.GetWindowIdFromWindow(_windowHandle);
+            //var _windowHandle = WindowNative.GetWindowHandle(currentWindow);
+            //var windowId = Win32Interop.GetWindowIdFromWindow(_windowHandle);
 
-            _notificationService.TitleChanged += (s, e) =>
-            {
-                var appWindow = AppWindow.GetFromWindowId(windowId);
-                appWindow.Title = e.Title;
-            };
+            //_notificationService.TitleChanged += (s, e) =>
+            //{
+            //    var appWindow = AppWindow.GetFromWindowId(windowId);
+            //    appWindow.Title = e.Title;
+            //};
 
-            _notificationService.UpdateTitle("Vaultr");
+            //_notificationService.UpdateTitle("Vaultr");
         }
     }
 }

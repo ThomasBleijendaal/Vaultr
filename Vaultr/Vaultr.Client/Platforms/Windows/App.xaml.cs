@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui;
-using Microsoft.Maui.Hosting;
-using Microsoft.UI;
+﻿using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Vaultr.Client.Core;
@@ -25,7 +22,7 @@ namespace Vaultr.Client.WinUI
         /// </summary>
         public App()
         { 
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         protected override MauiApp CreateMauiApp()
@@ -40,21 +37,19 @@ namespace Vaultr.Client.WinUI
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             base.OnLaunched(args);
-           
-            //Microsoft.Maui.Essentials.Platform.OnLaunched(args);
 
-            //var currentWindow = Application.Windows[0].Handler?.NativeView;
+            var currentWindow = Application.Windows[0].Handler?.PlatformView;
 
-            //var _windowHandle = WindowNative.GetWindowHandle(currentWindow);
-            //var windowId = Win32Interop.GetWindowIdFromWindow(_windowHandle);
+            var _windowHandle = WindowNative.GetWindowHandle(currentWindow);
+            var windowId = Win32Interop.GetWindowIdFromWindow(_windowHandle);
 
-            //_notificationService.TitleChanged += (s, e) =>
-            //{
-            //    var appWindow = AppWindow.GetFromWindowId(windowId);
-            //    appWindow.Title = e.Title;
-            //};
+            _notificationService.TitleChanged += (s, e) =>
+            {
+                var appWindow = AppWindow.GetFromWindowId(windowId);
+                appWindow.Title = e.Title;
+            };
 
-            //_notificationService.UpdateTitle("Vaultr");
+            _notificationService.UpdateTitle("Vaultr");
         }
     }
 }

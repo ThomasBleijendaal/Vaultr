@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Vaultr.Client.Core.Models;
+﻿using Vaultr.Client.Core.Models;
 
 namespace Vaultr.Client.Core.Abstractions;
 
@@ -12,6 +11,8 @@ public interface IConfigurationStateProvider
     void SetCurrentState(ConfigurationState? state);
 
     void AddState(ConfigurationState state);
+
+    void UpdateState(ConfigurationState state);
 
     void RemoveState(ConfigurationState state);
 }

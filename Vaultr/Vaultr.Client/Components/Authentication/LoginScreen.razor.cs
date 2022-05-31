@@ -1,6 +1,12 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
+using RapidCMS.Core.Abstractions.Mediators;
+using RapidCMS.Core.Enums;
+using RapidCMS.Core.Extensions;
+using RapidCMS.Core.Forms;
+using RapidCMS.Core.Models.EventArgs.Mediators;
+using Vaultr.Client.Components.Panes;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
 using Vaultr.Client.Data.Repositories;
@@ -22,6 +28,9 @@ public partial class LoginScreen
     [Inject]
     public ISecretClientsProvider SecretClientsProvider { get; set; } = null!;
 
+    [Inject]
+    public IJSRuntime JsRuntime { get; set; } = null!;
+
     protected override void OnInitialized()
     {
         Configurations = ConfigurationStateProvider.GetConfigurations();
@@ -33,7 +42,14 @@ public partial class LoginScreen
     {
         if (NewConfig.IsValid())
         {
-            ConfigurationStateProvider.AddState(NewConfig);
+            if (!Configurations.Contains(NewConfig))
+            {
+                ConfigurationStateProvider.AddState(NewConfig);
+            }
+            else
+            {
+                ConfigurationStateProvider.UpdateState(NewConfig);
+            }
         }
 
         NewConfig = new ConfigurationState();
@@ -41,9 +57,33 @@ public partial class LoginScreen
         StateHasChanged();
     }
 
-    private void Remove(ConfigurationState config)
+    private void Edit(ConfigurationState config)
     {
-        ConfigurationStateProvider.RemoveState(config);
+        NewConfig = config;
+
+        StateHasChanged();
+    }
+
+    private void Duplicate(ConfigurationState config)
+    {
+        NewConfig.Name = config.Name;
+        NewConfig.TenantId = config.TenantId;
+        NewConfig.KeyVaults = config.KeyVaults.ToList(x => new ConfigurationState.KeyVaultConfiguration
+        {
+            Name = x.Name
+        });
+
+        StateHasChanged();
+    }
+
+    private async Task RemoveAsync(ConfigurationState config)
+    {
+        if (await JsRuntime.InvokeAsync<bool>("window.confirm", $"Remove {config.Name}?"))
+        {
+            ConfigurationStateProvider.RemoveState(config);
+
+            StateHasChanged();
+        }
     }
 
     private void Login(ConfigurationState config)

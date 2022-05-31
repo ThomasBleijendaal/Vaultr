@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Azure.Security.KeyVault.Secrets;
+﻿using Azure.Security.KeyVault.Secrets;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;
@@ -94,21 +91,28 @@ public class SecretsProvider : ISecretsProvider
 
         foreach (var kv in _secretClientsProvider.Clients)
         {
-            var keyVaultSecrets = await kv.Value.GetPropertiesOfSecretsAsync().ToListAsync();
-
-            foreach (var keyVaultSecret in keyVaultSecrets)
+            try
             {
-                var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
-                if (secret == null)
-                {
-                    secret = new KeyVaultSecretEntity
-                    {
-                        Id = keyVaultSecret.Name
-                    };
-                    secrets.Add(secret);
-                }
+                var keyVaultSecrets = await kv.Value.GetPropertiesOfSecretsAsync().ToListAsync();
 
-                secret.KeyVaultUris.Add(kv.Key, keyVaultSecret.Id);
+                foreach (var keyVaultSecret in keyVaultSecrets)
+                {
+                    var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
+                    if (secret == null)
+                    {
+                        secret = new KeyVaultSecretEntity
+                        {
+                            Id = keyVaultSecret.Name
+                        };
+                        secrets.Add(secret);
+                    }
+
+                    secret.KeyVaultUris.Add(kv.Key, keyVaultSecret.Id);
+                }
+            }
+            catch (Exception)
+            {
+                _mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secrets from {kv.Key}."));
             }
         }
 

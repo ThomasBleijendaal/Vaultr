@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
 
@@ -10,7 +6,7 @@ namespace Vaultr.Client.Core.Providers;
 
 public class ConfigurationStateProvider : IConfigurationStateProvider
 {
-    private List<ConfigurationState> _config;
+    private readonly List<ConfigurationState> _config;
     private ConfigurationState? _currentState;
     private readonly string _storageFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "settings.json");
 
@@ -40,13 +36,14 @@ public class ConfigurationStateProvider : IConfigurationStateProvider
 
     public void AddState(ConfigurationState state)
     {
-        state.KeyVaults = state.KeyVaults
-            .Where(x => !string.IsNullOrWhiteSpace(x.Name))
-            .GroupBy(x => x.Name)
-            .Select(x => x.First())
-            .ToList();
-
+        state.SanitizeKeyVaults();
         _config.Add(state);
+        SaveConfig();
+    }
+
+    public void UpdateState(ConfigurationState state)
+    {
+        state.SanitizeKeyVaults();
         SaveConfig();
     }
 

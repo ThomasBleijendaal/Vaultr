@@ -1,6 +1,4 @@
-﻿using Microsoft.Maui.Controls;
-
-namespace Vaultr.Client
+﻿namespace Vaultr.Client
 {
     public partial class MainPage : ContentPage
     {

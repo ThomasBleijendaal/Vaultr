@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Vaultr.Client.Data.Models;
+﻿using Vaultr.Client.Data.Models;
 
 namespace Vaultr.Client.Data.Repositories;
 

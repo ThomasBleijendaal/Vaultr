@@ -7,7 +7,13 @@
     <div class="configuration" @onclick=@((e) => Login(config)) title="Login">
         <p><strong>@config.Name</strong><br /><small>@config.TenantId</small></p>
         <p>@(string.Join(", ", config.KeyVaults.Select(x => x.Name)))</p>
-        <p><a href="#" @onclick=@((e) => Remove(config)) @onclick:stopPropagation="true" class="danger">Remove from list</a></p>
+        <p>
+            <a href="#" @onclick=@((e) => Edit(config)) @onclick:stopPropagation="true" @onclick:preventDefault="true" class="danger">Edit</a>
+            |
+            <a href="#" @onclick=@((e) => Duplicate(config)) @onclick:stopPropagation="true" @onclick:preventDefault="true" class="danger">Duplicate</a>
+            |
+            <a href="#" @onclick=@((e) => RemoveAsync(config)) @onclick:stopPropagation="true" @onclick:preventDefault="true" class="danger">Remove</a>
+        </p>
     </div>
 }
 
@@ -32,7 +38,7 @@
             }
         </div>
 
-        <button class="btn btn-primary" type="button" @onclick=@((e) => NewConfig.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
+        <button class="btn btn-light" type="button" @onclick=@((e) => NewConfig.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
 
         <hr />
 

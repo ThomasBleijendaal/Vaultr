@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Azure.Security.KeyVault.Secrets;
+﻿using Azure.Security.KeyVault.Secrets;
 
 namespace Vaultr.Client.Data.Repositories
 {

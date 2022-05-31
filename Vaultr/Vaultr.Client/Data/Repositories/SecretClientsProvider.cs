@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Azure.Identity;
+﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Vaultr.Client.Core.Abstractions;
 
@@ -34,7 +32,14 @@ public class SecretClientsProvider : ISecretClientsProvider
             {
                 _clients.Add(kv.Name, new SecretClient(
                     new Uri($"https://{kv.Name}.vault.azure.net"),
-                    credential));
+                    credential, 
+                    new SecretClientOptions
+                    {
+                        Retry =
+                        {
+                            MaxRetries = 1
+                        }
+                    }));
             }
         }
     }

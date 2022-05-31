@@ -1,5 +1,4 @@
-﻿using System;
-using RapidCMS.Core.Abstractions.Metadata;
+﻿using RapidCMS.Core.Abstractions.Metadata;
 
 namespace Vaultr.Client.Data.Metadata;
 

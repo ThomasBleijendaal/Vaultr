@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Vaultr.Client.Core
+﻿namespace Vaultr.Client.Core
 {
     public class NotificationService
     {

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;

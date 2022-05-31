@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
-using RapidCMS.Core.Abstractions.Mediators;
-using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;
-using RapidCMS.Core.Forms;
-using RapidCMS.Core.Models.EventArgs.Mediators;
-using Vaultr.Client.Components.Panes;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
 using Vaultr.Client.Data.Repositories;

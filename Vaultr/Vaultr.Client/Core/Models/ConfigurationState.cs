@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace Vaultr.Client.Core.Models;
+﻿namespace Vaultr.Client.Core.Models;
 
 public class ConfigurationState
 {

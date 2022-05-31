@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using RapidCMS.Core.Abstractions.Plugins;
+﻿using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Handlers;

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using RapidCMS.Core.Abstractions.Data;
+﻿using RapidCMS.Core.Abstractions.Data;
 
 namespace Vaultr.Client.Data.Models;
 

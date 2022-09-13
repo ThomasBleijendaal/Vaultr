@@ -38,7 +38,9 @@ jobs:
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
       - name: Build MAUI Windows
-        run: dotnet publish -f net6.0-windows10.0.19041.0 -c Release
+        run: |
+          cd Vaultr/Vaultr.Client
+          dotnet publish -f net6.0-windows10.0.19041.0 -c Release
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1

@@ -1,11 +1,10 @@
 ﻿using Azure.Security.KeyVault.Secrets;
 
-namespace Vaultr.Client.Data.Repositories
-{
-    public interface ISecretClientsProvider
-    {
-        IReadOnlyDictionary<string, SecretClient> Clients { get; }
+namespace Vaultr.Client.Data.Repositories;
 
-        void Build();
-    }
+public interface ISecretClientsProvider
+{
+    IReadOnlyDictionary<string, SecretClient> Clients { get; }
+
+    void Build();
 }

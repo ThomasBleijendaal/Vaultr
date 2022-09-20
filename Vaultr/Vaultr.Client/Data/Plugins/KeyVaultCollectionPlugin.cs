@@ -1,7 +1,9 @@
-﻿using RapidCMS.Core.Abstractions.Plugins;
+﻿using RapidCMS.Core.Abstractions.Data;
+using RapidCMS.Core.Abstractions.Plugins;
 using RapidCMS.Core.Abstractions.Resolvers;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Handlers;
+using RapidCMS.Core.Models.Data;
 using RapidCMS.Core.Models.Setup;
 using Vaultr.Client.Components.Buttons;
 using Vaultr.Client.Components.Editors;
@@ -43,6 +45,11 @@ public class KeyVaultCollectionPlugin : IPlugin
                 new ExpressionMetadata<KeyVaultSecretEntity>("Id", x => x.Id ?? string.Empty)),
             EntityVariant = _secretVariant,
             Collections = new List<TreeElementSetup>(),
+            DataViews = state.KeyVaults.Count == 1 ? new List<IDataView>() : new List<IDataView>
+            {
+                new DataView<KeyVaultSecretEntity>(1, "All secrets", entity => true),
+                new DataView<KeyVaultSecretEntity>(2, "Diffs only", entity => entity.KeyVaultUris.Count != state.KeyVaults.Count)
+            },
             UsageType = UsageType.List,
             ListEditor = new ListSetup(
                 20,

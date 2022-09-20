@@ -3,43 +3,42 @@ using RapidCMS.Core.Enums;
 using RapidCMS.Core.Models.EventArgs.Mediators;
 using Vaultr.Client.Core.Abstractions;
 
-namespace Vaultr.Client.Core.Providers
+namespace Vaultr.Client.Core.Providers;
+
+internal class DangerModeProvider : IDangerModeProvider
 {
-    internal class DangerModeProvider : IDangerModeProvider
+    private readonly IMediator _mediator;
+
+    public DangerModeProvider(IMediator mediator)
     {
-        private readonly IMediator _mediator;
+        _mediator = mediator;
+    }
 
-        public DangerModeProvider(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
+    public bool IsEnabled { get; private set; }
 
-        public bool IsEnabled { get; private set; }
+    public void Disable()
+    {
+        IsEnabled = false;
 
-        public void Disable()
-        {
-            IsEnabled = false;
+        Notify();
+    }
 
-            Notify();
-        }
+    public void Enable()
+    {
+        IsEnabled = true;
 
-        public void Enable()
-        {
-            IsEnabled = true;
+        Notify();
+    }
 
-            Notify();
-        }
-
-        private void Notify()
-        {
-            _mediator.NotifyEvent(
-                this,
-                new CollectionRepositoryEventArgs(
-                    "vaultr::secrets",
-                    "vaultr::secrets",
-                    default,
-                    default(string),
-                    CrudType.Update));
-        }
+    private void Notify()
+    {
+        _mediator.NotifyEvent(
+            this,
+            new CollectionRepositoryEventArgs(
+                "vaultr::secrets",
+                "vaultr::secrets",
+                default,
+                default(string),
+                CrudType.Update));
     }
 }

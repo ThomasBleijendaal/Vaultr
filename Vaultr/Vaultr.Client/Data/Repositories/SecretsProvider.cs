@@ -1,4 +1,5 @@
-﻿using Azure.Security.KeyVault.Secrets;
+﻿using System.Windows.Forms;
+using Azure.Security.KeyVault.Secrets;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;
@@ -70,49 +71,54 @@ public class SecretsProvider : ISecretsProvider
         return entity;
     }
 
-    public async Task<string> GetSecretValueAsync(string keyVaultName, string keyName) 
+    public async Task<string> GetSecretValueAsync(string keyVaultName, string keyName)
         => (await Client(keyVaultName).GetSecretAsync(keyName)).Value.Value;
 
     public string? NextKeyVaultName(string keyVaultName)
         => _secretClientsProvider.Clients.Keys.ElementAt(GetKeyVaultIndex(keyVaultName) + 1);
-    
+
     public string? PreviousKeyVaultName(string keyVaultName)
         => _secretClientsProvider.Clients.Keys.ElementAt(GetKeyVaultIndex(keyVaultName) - 1);
 
-    public async Task SaveSecretValueAsync(string keyVaultName, string keyName, string keyValue) 
+    public async Task SaveSecretValueAsync(string keyVaultName, string keyName, string keyValue)
         => await SaveSecretAsync(keyVaultName, keyName, keyValue);
 
-    private SecretClient Client(string keyVaultName) 
+    private SecretClient Client(string keyVaultName)
         => _secretClientsProvider.Clients[keyVaultName];
 
     private async Task RefreshSecretCacheAsync()
     {
         var secrets = new List<KeyVaultSecretEntity>();
 
-        foreach (var kv in _secretClientsProvider.Clients)
+        var allKeyVaultSecrets = await _secretClientsProvider.Clients.Select(async x =>
         {
             try
             {
-                var keyVaultSecrets = await kv.Value.GetPropertiesOfSecretsAsync().ToListAsync();
-
-                foreach (var keyVaultSecret in keyVaultSecrets)
-                {
-                    var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
-                    if (secret == null)
-                    {
-                        secret = new KeyVaultSecretEntity
-                        {
-                            Id = keyVaultSecret.Name
-                        };
-                        secrets.Add(secret);
-                    }
-
-                    secret.KeyVaultUris.Add(kv.Key, keyVaultSecret.Id);
-                }
+                return (x.Key, await x.Value.GetPropertiesOfSecretsAsync().ToListAsync());
             }
             catch (Exception)
             {
-                _mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secrets from {kv.Key}."));
+                _mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secrets from {x.Key}."));
+
+                return (x.Key, new List<SecretProperties>());
+            }
+        }).ToListAsync();
+
+        foreach (var (key, keyVaultSecrets) in allKeyVaultSecrets)
+        {
+            foreach (var keyVaultSecret in keyVaultSecrets.Where(x => x.Managed == false))
+            {
+                var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
+                if (secret == null)
+                {
+                    secret = new KeyVaultSecretEntity
+                    {
+                        Id = keyVaultSecret.Name
+                    };
+                    secrets.Add(secret);
+                }
+
+                secret.KeyVaultUris.Add(key, keyVaultSecret.Id);
             }
         }
 
@@ -133,7 +139,7 @@ public class SecretsProvider : ISecretsProvider
             secret.Id = keyName;
             secret.KeyVaultUris[keyVaultName] = response.Value.Id;
             _secrets.Insert(0, secret);
-        } 
+        }
         else
         {
             secret.KeyVaultUris[keyVaultName] = response.Value.Id;

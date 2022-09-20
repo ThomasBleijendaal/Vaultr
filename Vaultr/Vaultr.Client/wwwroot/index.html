@@ -14,8 +14,15 @@
         .main {
             margin-left: 0px;
         }
-        .navbar, .nav-item a.active, .nav-item a:hover {
+        .navbar {
             background-color: rgb(127, 186, 0) !important;
+        }
+        .nav-tabs .nav-link.active {
+            border-bottom-color: rgb(127, 186, 0) !important;
+        }
+        .nav-tabs .nav-item a:hover {
+            background-color: rgb(227, 227, 227) !important;
+            border-bottom-color: rgb(186, 186, 186) !important;
         }
         .btn-primary, .btn-light:hover {
             background-color: rgb(127, 186, 0) !important;
@@ -23,6 +30,15 @@
         }
         .btn .ms-Icon {
             margin-right: 0;
+        }
+        .btn .spinner-border {
+            margin-right: 0 !important;
+        }
+        .input-group-prepend .spinner-border, .input-group-append .spinner-border {
+            border-radius: 50% !important;
+            background-color: unset !important;
+            width: 14px !important;
+            height: 14px !important;
         }
         .configuration, .configuration-form {
             margin: .3rem 0;
@@ -41,6 +57,9 @@
         }
         input + input {
             margin-top: .05rem;
+        }
+        input.last-to-copy {
+            background-color: rgb(247, 247, 132) !important;
         }
         .btn-danger-mode-enabled {
             animation: blink 1s ease infinite;

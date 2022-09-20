@@ -5,8 +5,8 @@ using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Forms;
 using RapidCMS.Core.Models.EventArgs.Mediators;
-using Vaultr.Client.Components.EventArgs;
 using Vaultr.Client.Components.Panes;
+using Vaultr.Client.Core;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Data.Repositories;
 
@@ -14,9 +14,22 @@ namespace Vaultr.Client.Components.Editors;
 
 public partial class SecretEditor
 {
+    private enum Action
+    {
+        Nothing,
+        Deleting,
+        Saving, 
+        Copying,
+        Promoting,
+        Demoting,
+        Unlocking
+    }
+
     private static Guid _latestEditorIdToCopy;
     private readonly Guid _editorId = Guid.NewGuid();
+
     private IDisposable? _highlightEvent;
+    private IDisposable? _copyEvent;
 
     private string? Value { get; set; }
     private bool IsDecrypted { get; set; }
@@ -26,6 +39,8 @@ public partial class SecretEditor
 
     private bool? CanPromote => SecretsProvider.CanPromote(KeyVaultName) is bool can ? can && !IsEmpty : null;
     private bool? CanDemote => SecretsProvider.CanDemote(KeyVaultName) is bool can ? can && !IsEmpty : null;
+
+    private Action IsDoing { get; set; }
 
     private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
 
@@ -70,12 +85,23 @@ public partial class SecretEditor
 
             await InvokeAsync(() => StateHasChanged());
         });
+
+        _copyEvent = Mediator.RegisterCallback<CopyEventArgs>(async (sender, args) =>
+        {
+            if (KeyVaultName == args.KeyVaultName && KeyName == args.KeyName)
+            {
+                await InvokeAsync(() => StateHasChanged());
+            }
+        });
     }
 
     protected override void DetachListener()
     {
         _highlightEvent?.Dispose();
         _highlightEvent = null;
+
+        _copyEvent?.Dispose();
+        _copyEvent = null;
     }
 
     private string GetValue()
@@ -103,6 +129,8 @@ public partial class SecretEditor
     {
         try
         {
+            IsDoing = Action.Unlocking;
+
             IsDecrypted = true;
             Value = await SecretsProvider.GetSecretValueAsync(KeyVaultName, KeyName);
 
@@ -113,6 +141,10 @@ public partial class SecretEditor
         catch (Exception ex)
         {
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secret: {ex.Message}"));
+        }
+        finally
+        {
+            DoNothingIf(Action.Unlocking);
         }
     }
 
@@ -131,6 +163,8 @@ public partial class SecretEditor
     {
         try
         {
+            IsDoing = Action.Saving;
+
             MemoryCache.Remove(CacheKey());
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Saving secret.."));
@@ -140,27 +174,34 @@ public partial class SecretEditor
             Lock();
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret saved!"));
-            Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+
+            StateHasChanged();
         }
         catch (Exception ex)
         {
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to save secret: {ex.Message}"));
         }
+        finally
+        {
+            DoNothingIf(Action.Saving);
+        }
     }
 
-    private Task DemoteAsync() => PreviousKeyVaultName != null ? CopyAsync(PreviousKeyVaultName) : Task.CompletedTask;
-    private Task PromoteAsync() => NextKeyVaultName != null ? CopyAsync(NextKeyVaultName) : Task.CompletedTask;
+    private Task DemoteAsync() => PreviousKeyVaultName != null ? CopyAsync(PreviousKeyVaultName, Action.Demoting) : Task.CompletedTask;
+    private Task PromoteAsync() => NextKeyVaultName != null ? CopyAsync(NextKeyVaultName, Action.Promoting) : Task.CompletedTask;
 
-    private async Task CopyAsync(string targetKeyVault)
+    private async Task CopyAsync(string targetKeyVault, Action action)
     {
         try
         {
+            IsDoing = action;
+
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Copying secret.."));
 
             await SecretsProvider.CopySecretValueAsync(KeyVaultName, KeyName, targetKeyVault);
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied!"));
-            Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+            Mediator.NotifyEvent(this, new CopyEventArgs(targetKeyVault, KeyName));
 
             Lock();
         }
@@ -168,12 +209,18 @@ public partial class SecretEditor
         {
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to copy secret: {ex.Message}"));
         }
+        finally
+        {
+            DoNothingIf(action);
+        }
     }
 
     private async Task CopyToClipboardAsync()
     {
         try
         {
+            IsDoing = Action.Copying;
+
             _latestEditorIdToCopy = _editorId;
             Mediator.NotifyEvent(this, new HighlightEventArgs(_editorId));
 
@@ -183,11 +230,14 @@ public partial class SecretEditor
             await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", secretValue);
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied to clipboard!"));
-
         }
         catch (Exception ex)
         {
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secret: {ex.Message}"));
+        }
+        finally
+        {
+            DoNothingIf(Action.Copying);
         }
     }
 
@@ -195,6 +245,8 @@ public partial class SecretEditor
     {
         try
         {
+            IsDoing = Action.Deleting;
+
             MemoryCache.Remove(CacheKey());
 
             if (await Mediator.NotifyEventAsync(this, new PaneRequestEventArgs(typeof(ConfirmPane), EditContext, new ButtonContext(default, KeyVaultName))) == CrudType.Delete)
@@ -203,20 +255,34 @@ public partial class SecretEditor
 
                 SetValue(null!);
 
+                StateHasChanged();
+
                 await SecretsProvider.DeleteSecretAsync(KeyVaultName, KeyName);
 
                 Lock();
 
                 Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret deleted!"));
-                Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, default, Entity.Id, CrudType.Update));
+
+                StateHasChanged();
             }
         }
         catch (Exception ex)
         {
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to delete secret: {ex.Message}"));
         }
+        finally
+        {
+            DoNothingIf(Action.Deleting);
+        }
     }
 
     private string CacheKey() => $"{EditContext.Entity.Id}{KeyVaultName}";
 
+    private void DoNothingIf(Action action)
+    {
+        if (IsDoing == action)
+        {
+            IsDoing = Action.Nothing;
+        }
+    }
 }

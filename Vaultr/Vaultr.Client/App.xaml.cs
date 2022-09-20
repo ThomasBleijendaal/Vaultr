@@ -1,13 +1,12 @@
 ﻿using Application = Microsoft.Maui.Controls.Application;
 
-namespace Vaultr.Client
+namespace Vaultr.Client;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-            MainPage = new MainPage();
-        }
+        InitializeComponent();
+        MainPage = new MainPage();
     }
 }

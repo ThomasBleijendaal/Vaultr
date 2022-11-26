@@ -175,6 +175,8 @@ public partial class SecretEditor
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret saved!"));
 
+            Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, EditContext.Parent?.GetParentPath(), EditContext.Entity.Id, CrudType.Add));
+
             StateHasChanged();
         }
         catch (Exception ex)

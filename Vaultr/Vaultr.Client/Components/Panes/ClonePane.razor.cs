@@ -21,7 +21,7 @@ public partial class ClonePane
 
     protected override void OnInitialized()
     {
-        if (EditContext.Entity is KeyVaultSecretEntity secret)
+        if (EditContext?.Entity is KeyVaultSecretEntity secret)
         {
             _secret = secret;
             Clone.NewName = secret.Id ?? "";
@@ -41,21 +41,23 @@ public partial class ClonePane
             return;
         }
 
-        foreach (var kv in Clone.KeyVaults.Where(x => x.ShouldClone))
-        {
-            Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Cloning secret to {kv.Name}.."));
-
-            await SecretsProvider.SaveSecretValueAsync(
-                kv.Name,
-                Clone.NewName,
-                await SecretsProvider.GetSecretValueAsync(kv.Name, _secret.Id!));
-
-            Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, $"Cloned secret to {kv.Name}!"));
-        }
+        await Task.WhenAll(Clone.KeyVaults.Where(x => x.ShouldClone).Select(CloneSecretAsync));
 
         SecretsProvider.ClearCache();
 
         ButtonClicked(CrudType.Refresh);
+    }
+
+    private async Task CloneSecretAsync(CloneModel.KeyVaultClone? kv)
+    {
+        Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Cloning secret to {kv.Name}.."));
+
+        await SecretsProvider.SaveSecretValueAsync(
+            kv.Name,
+            Clone.NewName,
+            await SecretsProvider.GetSecretValueAsync(kv.Name, _secret!.Id!));
+
+        Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, $"Cloned secret to {kv.Name}!"));
     }
 }
 

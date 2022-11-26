@@ -139,6 +139,18 @@ public class KeyVaultCollectionPlugin : IPlugin
                         EntityVariant = _secretVariant,
                         CustomType = typeof(DangerModeButton)
                     },
+                    new ButtonSetup()
+                    {
+                        ButtonHandlerType = typeof(DefaultButtonActionHandler),
+                        ButtonId = "refresh",
+                        Buttons = new List<ButtonSetup>(),
+                        DefaultButtonType = DefaultButtonType.New,
+                        Icon = "Section",
+                        IsPrimary = true,
+                        Label = "Refresh secrets",
+                        EntityVariant = _secretVariant,
+                        CustomType = typeof(RefreshButton)
+                    },
                 })
             {
 

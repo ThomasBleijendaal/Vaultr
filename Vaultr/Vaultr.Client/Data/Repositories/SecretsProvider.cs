@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using Azure.Security.KeyVault.Secrets;
+﻿using Azure.Security.KeyVault.Secrets;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;
@@ -82,6 +81,8 @@ public class SecretsProvider : ISecretsProvider
 
     public async Task SaveSecretValueAsync(string keyVaultName, string keyName, string keyValue)
         => await SaveSecretAsync(keyVaultName, keyName, keyValue);
+
+    public bool HighKeyvaultCount => _secretClientsProvider.Clients.Count > 5;
 
     private SecretClient Client(string keyVaultName)
         => _secretClientsProvider.Clients[keyVaultName];

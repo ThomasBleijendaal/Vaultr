@@ -23,4 +23,6 @@ public interface ISecretsProvider
 
     string? NextKeyVaultName(string keyVaultName);
     string? PreviousKeyVaultName(string keyVaultName);
+
+    bool HighKeyvaultCount { get; }
 }

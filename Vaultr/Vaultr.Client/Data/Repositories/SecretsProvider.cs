@@ -1,5 +1,4 @@
-﻿using System.Windows.Forms;
-using Azure.Security.KeyVault.Secrets;
+﻿using Azure.Security.KeyVault.Secrets;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;

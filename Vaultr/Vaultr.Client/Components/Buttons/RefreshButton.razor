@@ -1,0 +1,16 @@
+﻿@inherits BaseButton
+@inject IMediator Mediator
+@inject ISecretsProvider SecretsProvider
+
+<div class="btn btn-light" @onclick=Refresh>
+    @Model.Label
+</div>
+
+@code {
+    private void Refresh(MouseEventArgs args)
+    {
+        SecretsProvider.ClearCache();
+
+        Mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(EditContext.CollectionAlias, EditContext.RepositoryAlias, null, (string?)null, CrudType.Insert));
+    }
+}

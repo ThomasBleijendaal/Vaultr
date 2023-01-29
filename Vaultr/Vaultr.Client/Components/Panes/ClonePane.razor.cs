@@ -35,15 +35,21 @@ public partial class ClonePane
 
     private async Task CloneAsync()
     {
-        if (_secret == null)
+        try
         {
-            ButtonClicked(CrudType.None);
-            return;
+            if (_secret == null)
+            {
+                ButtonClicked(CrudType.None);
+                return;
+            }
+
+            await Task.WhenAll(Clone.KeyVaults.Where(x => x.ShouldClone).Select(CloneSecretAsync));
+
+            SecretsProvider.ClearCache();
         }
-
-        await Task.WhenAll(Clone.KeyVaults.Where(x => x.ShouldClone).Select(CloneSecretAsync));
-
-        SecretsProvider.ClearCache();
+        catch
+        {
+        }
 
         ButtonClicked(CrudType.Refresh);
     }

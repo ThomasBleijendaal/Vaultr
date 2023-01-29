@@ -11,64 +11,78 @@
         .sidebar {
             display: none;
         }
+
         .main {
             margin-left: 0px;
         }
+
         .navbar {
             background-color: rgb(127, 186, 0) !important;
         }
+
         .nav-tabs .nav-link.active {
             border-bottom-color: rgb(127, 186, 0) !important;
         }
+
         .nav-tabs .nav-item a:hover {
             background-color: rgb(227, 227, 227) !important;
             border-bottom-color: rgb(186, 186, 186) !important;
         }
+
         .btn-primary, .btn-light:hover {
             background-color: rgb(127, 186, 0) !important;
             border-color: rgb(127, 186, 0) !important;
         }
+
         .btn .ms-Icon {
             margin-right: 0;
         }
+
         .btn .spinner-border {
             margin-right: 0 !important;
         }
+
         .input-group-prepend .spinner-border, .input-group-append .spinner-border {
             border-radius: 50% !important;
             background-color: unset !important;
             width: 14px !important;
             height: 14px !important;
         }
+
         .configuration, .configuration-form {
             margin: .3rem 0;
             padding: .6rem;
             border: 1px solid #a0aeb2;
             background-color: #faf9f8;
         }
+
             .configuration:hover {
                 cursor: pointer;
                 border: 1px solid rgb(252, 209, 22);
                 background-color: rgb(255, 244, 233);
             }
-        
+
         .login {
             width: 600px;
         }
+
         input + input {
             margin-top: .05rem;
         }
+
         input.last-to-copy {
             background-color: rgb(247, 247, 132) !important;
         }
-        .input-group-append.wrap
-        {
+
+        .input-group-append.wrap {
             width: 100%;
             margin-left: 1px;
         }
+
         .btn-danger-mode-enabled {
             animation: blink 1s ease infinite;
         }
+
         .main .messages {
             width: 250px !important;
             left: 25px;
@@ -77,7 +91,7 @@
             right: unset;
         }
 
-        table td:first-child{
+        table td:first-child {
             width: 40%;
         }
 
@@ -110,8 +124,23 @@
     <script src="_content/rapidcms.ui/js/interop.js"></script>
     <script>
         window.clipboardCopy = {
-            copyText: function (text) {
-                navigator.clipboard.writeText(text);
+            copyText: async function (text) {
+                await navigator.clipboard.writeText(text);
+            },
+            getText: async function () {
+                return await navigator.clipboard.readText();
+            }
+        };
+
+        window.secretEditor = {
+            showDropdown: function (element) {
+                var dropdown = element.parentElement.getElementsByClassName('dropdown-menu')[0];
+                dropdown.classList.toggle('show');
+            },
+            hideDropdown: function () {
+                Array.prototype.forEach.call(
+                    document.getElementsByClassName('dropdown-menu'),
+                    dropdown => dropdown.classList.remove('show'));
             }
         };
     </script>

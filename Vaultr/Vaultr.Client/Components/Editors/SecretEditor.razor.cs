@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using System.Text;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.JSInterop;
 using RapidCMS.Core.Abstractions.Mediators;
@@ -217,7 +218,15 @@ public partial class SecretEditor
         }
     }
 
-    private async Task CopyToClipboardAsync()
+    public enum CopyType
+    {
+        Regular,
+        Base64,
+        BasicAuthUsername,
+        BasicAuthPassword
+    }
+
+    private async Task CopyToClipboardAsync(CopyType? copyType)
     {
         try
         {
@@ -229,6 +238,41 @@ public partial class SecretEditor
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, "Getting secret.."));
 
             var secretValue = await SecretsProvider.GetSecretValueAsync(KeyVaultName, KeyName);
+
+            if (copyType == CopyType.Base64)
+            {
+                secretValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(secretValue));
+            }
+            else if (copyType == CopyType.BasicAuthUsername || copyType == CopyType.BasicAuthPassword)
+            {
+                var currentValue = await JsRuntime.InvokeAsync<string>("clipboardCopy.getText");
+
+                var items = new string[2] { "", "" };
+
+                try
+                {
+                    var usernamePassword = Encoding.UTF8.GetString(Convert.FromBase64String(currentValue)) ?? "";
+                    if (usernamePassword?.Contains(":") ?? false)
+                    {
+                        var usernamePasswordSplit = usernamePassword.Split(':');
+                        items[0] = usernamePasswordSplit[0];
+                        items[1] = usernamePasswordSplit[1];
+                    }
+                }
+                catch { }
+
+                if (copyType == CopyType.BasicAuthUsername)
+                {
+                    items[0] = secretValue;
+                }
+                else if (copyType == CopyType.BasicAuthPassword)
+                {
+                    items[1] = secretValue;
+                }
+
+                secretValue = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{items[0]}:{items[1]}"));
+            }
+
             await JsRuntime.InvokeVoidAsync("clipboardCopy.copyText", secretValue);
 
             Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Success, "Secret copied to clipboard!"));
@@ -242,6 +286,11 @@ public partial class SecretEditor
             DoNothingIf(Action.Copying);
         }
     }
+
+    private Task CopyToClipboardAsync() => CopyToClipboardAsync(CopyType.Regular);
+    private Task CopyAsBase64ToClipboardAsync() => CopyToClipboardAsync(CopyType.Base64);
+    private Task CopyAsUsernameToClipboardAsync() => CopyToClipboardAsync(CopyType.BasicAuthUsername);
+    private Task CopyAsPasswordToClipboardAsync() => CopyToClipboardAsync(CopyType.BasicAuthPassword);
 
     private async Task DeleteAsync()
     {

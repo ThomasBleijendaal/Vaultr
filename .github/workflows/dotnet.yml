@@ -30,7 +30,13 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
         with:
           vs-prerelease: true
-        
+      
+      - name: Decode the pfx
+        run: |
+          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+          $certificatePath = "Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
+          [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+
       - name: Install MAUI Workloads
         run: |
           dotnet workload install maui --ignore-failed-sources
@@ -40,10 +46,13 @@ jobs:
       - name: Build MAUI Windows
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net6.0-windows10.0.19041.0 -c Release
+          dotnet publish -f net6.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+
+      - name: Remove the pfx
+        run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/**/Vaultr.Client*.msix
+          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/win10-x64/AppPackages/**/*

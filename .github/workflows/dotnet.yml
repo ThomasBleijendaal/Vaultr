@@ -34,7 +34,7 @@ jobs:
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificatePath = "GitHubActionsWorkflow.pfx"
+          $certificatePath = "Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
           [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
       - name: Install MAUI Workloads
@@ -49,10 +49,12 @@ jobs:
           dotnet publish -f net6.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
 
       - name: Remove the pfx
-        run: Remove-Item -path GitHubActionsWorkflow.pfx
+        run: |
+          dir
+          Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/**
+          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/win10-x64/AppPackages/**/*

@@ -49,9 +49,7 @@ jobs:
           dotnet publish -f net6.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
 
       - name: Remove the pfx
-        run: |
-          dir
-          Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
+        run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1

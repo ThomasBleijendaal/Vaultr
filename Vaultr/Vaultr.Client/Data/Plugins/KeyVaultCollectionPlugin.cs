@@ -160,7 +160,7 @@ public class KeyVaultCollectionPlugin : IPlugin
         return Task.FromResult<IResolvedSetup<CollectionSetup>?>(new ResolvedSetup<CollectionSetup>(collection, false));
     }
 
-    public Type? GetRepositoryType(string collectionAlias) => typeof(KeyVaultRespository);
+    public Type? GetRepositoryType(string collectionAlias) => typeof(KeyVaultRepository);
 
     public Task<IEnumerable<TreeElementSetup>> GetTreeElementsAsync()
         => Task.FromResult<IEnumerable<TreeElementSetup>>(

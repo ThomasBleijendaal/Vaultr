@@ -9,6 +9,7 @@ using RapidCMS.Core.Models.EventArgs.Mediators;
 using Vaultr.Client.Components.Panes;
 using Vaultr.Client.Core;
 using Vaultr.Client.Core.Abstractions;
+using Vaultr.Client.Data.Models;
 using Vaultr.Client.Data.Repositories;
 
 namespace Vaultr.Client.Components.Editors;
@@ -19,7 +20,7 @@ public partial class SecretEditor
     {
         Nothing,
         Deleting,
-        Saving, 
+        Saving,
         Copying,
         Promoting,
         Demoting,
@@ -31,6 +32,7 @@ public partial class SecretEditor
 
     private IDisposable? _highlightEvent;
     private IDisposable? _copyEvent;
+    private IDisposable? _metricsEvent;
 
     private string? Value { get; set; }
     private bool IsDecrypted { get; set; }
@@ -58,7 +60,11 @@ public partial class SecretEditor
 
     [Inject] private IMemoryCache MemoryCache { get; set; } = null!;
 
+    [Inject] private IMetricsProvider MetricsProvider { get; set; } = null!;
+
     private string KeyName => EditContext.Entity.Id ?? "";
+
+    private KeyVaultSecretMetric? SecretMetric { get; set; }
 
     protected override void OnParametersSet()
     {
@@ -76,6 +82,8 @@ public partial class SecretEditor
                 MemoryCache.Set(CacheKey(), Value, TimeSpan.FromSeconds(60));
             }
         }
+
+        SecretMetric = MetricsProvider.GetMetric(KeyVaultName, KeyName);
     }
 
     protected override void AttachListener()
@@ -94,6 +102,16 @@ public partial class SecretEditor
                 await InvokeAsync(() => StateHasChanged());
             }
         });
+
+        _metricsEvent = Mediator.RegisterCallback<MetricsLoadedEventArgs>(async (sender, args) =>
+        {
+            if (KeyVaultName == args.KeyVaultName)
+            {
+                SecretMetric = MetricsProvider.GetMetric(KeyVaultName, KeyName);
+
+                await InvokeAsync(() => StateHasChanged());
+            }
+        });
     }
 
     protected override void DetachListener()
@@ -103,6 +121,9 @@ public partial class SecretEditor
 
         _copyEvent?.Dispose();
         _copyEvent = null;
+
+        _metricsEvent?.Dispose();
+        _metricsEvent = null;
     }
 
     private string GetValue()

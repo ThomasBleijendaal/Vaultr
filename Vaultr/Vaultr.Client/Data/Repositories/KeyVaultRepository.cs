@@ -6,11 +6,11 @@ using IView = RapidCMS.Core.Abstractions.Data.IView;
 
 namespace Vaultr.Client.Data.Repositories;
 
-public class KeyVaultRespository : IRepository
+public class KeyVaultRepository : IRepository
 {
     private readonly ISecretsProvider _secretsProvider;
 
-    public KeyVaultRespository(ISecretsProvider secretsProvider)
+    public KeyVaultRepository(ISecretsProvider secretsProvider)
     {
         _secretsProvider = secretsProvider;
     }
@@ -27,7 +27,7 @@ public class KeyVaultRespository : IRepository
     private Func<KeyVaultSecretEntity, bool> CompileQueryExpression(IView view)
     {
         var expression = (view.ActiveDataView?.QueryExpression.Compile()) as Func<KeyVaultSecretEntity, bool>;
-        
+
         return expression ?? NoFilter;
     }
 

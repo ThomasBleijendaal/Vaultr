@@ -30,7 +30,7 @@ public class SecretClientsProvider : ISecretClientsProvider
             {
                 _clients.Add(kv.Name, new SecretClient(
                     new Uri($"https://{kv.Name}.vault.azure.net"),
-                    _credentialProvider.GetTokenCredential(state.TenantId!), 
+                    _credentialProvider.GetTokenCredential(state.TenantId!),
                     new SecretClientOptions
                     {
                         Retry =
@@ -44,4 +44,3 @@ public class SecretClientsProvider : ISecretClientsProvider
 
     public IReadOnlyDictionary<string, SecretClient> Clients => _clients;
 }
-

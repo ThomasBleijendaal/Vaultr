@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using RapidCMS.Core.Abstractions.Mediators;
 using Vaultr.Client.Core.Abstractions;
 using Vaultr.Client.Core.Models;
 
@@ -6,11 +7,13 @@ namespace Vaultr.Client.Core.Providers;
 
 public class ConfigurationStateProvider : IConfigurationStateProvider
 {
+    private static ConfigurationState? _currentState { get; set; }
     private readonly List<ConfigurationState> _config;
-    private ConfigurationState? _currentState;
     private readonly string _storageFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "settings.json");
+    private readonly IMediator _mediator;
 
-    public ConfigurationStateProvider()
+    public ConfigurationStateProvider(
+        IMediator mediator)
     {
         if (File.Exists(_storageFile))
         {
@@ -18,6 +21,7 @@ public class ConfigurationStateProvider : IConfigurationStateProvider
         }
 
         _config ??= new List<ConfigurationState>();
+        _mediator = mediator;
     }
 
     public ConfigurationState GetCurrentState()
@@ -30,6 +34,8 @@ public class ConfigurationStateProvider : IConfigurationStateProvider
     public void SetCurrentState(ConfigurationState? state)
     {
         _currentState = state;
+
+        Notify();
     }
 
     public IReadOnlyList<ConfigurationState> GetConfigurations() => _config;
@@ -56,5 +62,17 @@ public class ConfigurationStateProvider : IConfigurationStateProvider
     private void SaveConfig()
     {
         File.WriteAllText(_storageFile, JsonConvert.SerializeObject(_config));
+    }
+
+    private void Notify()
+    {
+        if (_currentState == null)
+        {
+            return;
+        }
+
+        _mediator.NotifyEvent(
+            this,
+            new StateChangedEventArgs(_currentState));
     }
 }

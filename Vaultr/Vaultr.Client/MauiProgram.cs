@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
+using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Abstractions.Plugins;
 using Vaultr.Client.Components.Authentication;
 using Vaultr.Client.Core;
@@ -37,13 +38,15 @@ public static class MauiProgram
         builder.Services.AddScoped<ISecretClientsProvider, SecretClientsProvider>();
         builder.Services.AddScoped<ISecretsProvider, SecretsProvider>();
         builder.Services.AddScoped<IDangerModeProvider, DangerModeProvider>();
+        builder.Services.AddScoped<IMetricsProvider, MetricsProvider>();
+        builder.Services.AddScoped<IMediatorEventListener, MetricsProviderMediatorEventRegistration>();
 
         builder.Services.AddSingleton<IAuthorizationHandler, AllowAllAuthorizationHandler>();
         builder.Services.AddSingleton<AuthenticationStateProvider, ClientSpecifiedAuthenticationStateProvider>();
-        builder.Services.AddSingleton<IConfigurationStateProvider, ConfigurationStateProvider>();
+        builder.Services.AddScoped<IConfigurationStateProvider, ConfigurationStateProvider>();
 
         builder.Services.AddSingleton<IPlugin, KeyVaultCollectionPlugin>();
-        builder.Services.AddScoped<KeyVaultRespository>();
+        builder.Services.AddScoped<KeyVaultRepository>();
         builder.Services.AddSingleton<NotificationService>();
 
         builder.Services.AddRapidCMSWebAssembly(config =>
@@ -58,6 +61,8 @@ public static class MauiProgram
             config.AddPlugin<KeyVaultCollectionPlugin>();
         });
 
-        return builder.Build();
+        var app = builder.Build();
+
+        return app;
     }
 }

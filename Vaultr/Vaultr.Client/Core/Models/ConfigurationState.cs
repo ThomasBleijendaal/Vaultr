@@ -8,17 +8,19 @@ public class ConfigurationState
 
     public string? TenantId { get; set; }
 
+    public string? WorkspaceId { get; set; }
+
     public class KeyVaultConfiguration
     {
         public string Name { get; set; } = "";
+
+        public string WorkspaceId { get; set; } = "";
     }
 
     public bool IsValid()
-    {
-        return KeyVaults.Count > 0 
-            && KeyVaults.All(x => !string.IsNullOrWhiteSpace(x.Name)) 
+        => KeyVaults.Count > 0
+            && KeyVaults.Any(x => !string.IsNullOrWhiteSpace(x.Name))
             && !string.IsNullOrEmpty(TenantId);
-    }
 
     public void SanitizeKeyVaults()
     {

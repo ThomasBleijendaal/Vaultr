@@ -61,12 +61,15 @@ public partial class LoginScreen
 
     private void Duplicate(ConfigurationState config)
     {
-        NewConfig.Name = config.Name;
-        NewConfig.TenantId = config.TenantId;
-        NewConfig.KeyVaults = config.KeyVaults.ToList(x => new ConfigurationState.KeyVaultConfiguration
+        NewConfig = new ConfigurationState
         {
-            Name = x.Name
-        });
+            Name = config.Name,
+            TenantId = config.TenantId,
+            KeyVaults = config.KeyVaults.ToList(x => new ConfigurationState.KeyVaultConfiguration
+            {
+                Name = x.Name
+            })
+        };
 
         StateHasChanged();
     }

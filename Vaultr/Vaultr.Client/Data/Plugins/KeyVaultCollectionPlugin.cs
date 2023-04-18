@@ -47,8 +47,9 @@ public class KeyVaultCollectionPlugin : IPlugin
             Collections = new List<TreeElementSetup>(),
             DataViews = state.KeyVaults.Count == 1 ? new List<IDataView>() : new List<IDataView>
             {
-                new DataView<KeyVaultSecretEntity>(1, "All secrets", entity => true),
-                new DataView<KeyVaultSecretEntity>(2, "Diffs only", entity => entity.KeyVaultUris.Count != state.KeyVaults.Count)
+                new DataView<KeyVaultSecretEntity>(KeyVaultRepository.AllSecretsDataView, "All secrets", entity => true),
+                new DataView<KeyVaultSecretEntity>(KeyVaultRepository.DiffsOnlyDataView, "Diffs only", entity => entity.KeyVaultUris.Count != state.KeyVaults.Count),
+                new DataView<KeyVaultSecretEntity>(KeyVaultRepository.StaleOnlyDataView, "Stale only", entity => true)
             },
             UsageType = UsageType.List,
             ListEditor = new ListSetup(

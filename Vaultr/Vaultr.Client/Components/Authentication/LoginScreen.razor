@@ -34,7 +34,14 @@
 
             @foreach (var kv in NewConfig.KeyVaults)
             {
-                <InputText @bind-Value=kv.Name class="form-control" />
+                <div class="form-row">
+                    <div class="col">
+                        <InputText @bind-Value=kv.Name class="form-control" placeholder="KeyVault Name" />
+                    </div>
+                    <div class="col">
+                        <InputText @bind-Value=kv.WorkspaceId class="form-control" placeholder="Log Analytics Workspace Id" />
+                    </div>
+                </div>
             }
         </div>
 

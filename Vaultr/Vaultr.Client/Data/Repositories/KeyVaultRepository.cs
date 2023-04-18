@@ -8,11 +8,19 @@ namespace Vaultr.Client.Data.Repositories;
 
 public class KeyVaultRepository : IRepository
 {
-    private readonly ISecretsProvider _secretsProvider;
+    public const int AllSecretsDataView = 1;
+    public const int DiffsOnlyDataView = 2;
+    public const int StaleOnlyDataView = 3;
 
-    public KeyVaultRepository(ISecretsProvider secretsProvider)
+    private readonly ISecretsProvider _secretsProvider;
+    private readonly IMetricsProvider _metricsProvider;
+
+    public KeyVaultRepository(
+        ISecretsProvider secretsProvider,
+        IMetricsProvider metricsProvider)
     {
         _secretsProvider = secretsProvider;
+        _metricsProvider = metricsProvider;
     }
 
     public Task AddAsync(IRelatedViewContext viewContext, string id) => throw new NotImplementedException();
@@ -26,9 +34,16 @@ public class KeyVaultRepository : IRepository
 
     private Func<KeyVaultSecretEntity, bool> CompileQueryExpression(IView view)
     {
-        var expression = (view.ActiveDataView?.QueryExpression.Compile()) as Func<KeyVaultSecretEntity, bool>;
+        if (view.ActiveDataView?.Id == StaleOnlyDataView)
+        {
+            return entity => entity.Id != null && entity.KeyVaultUris.Any(kv => _metricsProvider.GetMetric(kv.Key, entity.Id)?.Reads == 0);
+        }
+        else
+        {
+            var expression = (view.ActiveDataView?.QueryExpression.Compile()) as Func<KeyVaultSecretEntity, bool>;
 
-        return expression ?? NoFilter;
+            return expression ?? NoFilter;
+        }
     }
 
     public Task<IEnumerable<IEntity>> GetAllNonRelatedAsync(IRelatedViewContext viewContext, IView view) => throw new NotImplementedException();

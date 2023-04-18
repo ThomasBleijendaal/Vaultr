@@ -28,7 +28,7 @@ internal class MetricsProvider : IMetricsProvider
             return item;
         }
 
-        if (Metrics.Count == 0)
+        if (!Metrics.Any(x => x.KeyVaultName == keyVaultName))
         {
             return null;
         }
@@ -64,64 +64,50 @@ internal class MetricsProvider : IMetricsProvider
             return;
         }
 
-        var client = new LogsQueryClient(_credentialProvider.GetTokenCredential(args.State.TenantId));
+        var credential = _credentialProvider.GetTokenCredential(args.State.TenantId);
 
-        // TODO: loop over keyvaults + keep watching token
-        // TODO: check if we should read metrics by configuring it on state
-        var query = @"
+        var client = new LogsQueryClient(credential);
+
+        foreach (var keyVault in args.State.KeyVaults.Where(x => !string.IsNullOrEmpty(x.WorkspaceId)))
+        {
+            if (token.IsCancellationRequested)
+            {
+                break;
+            }
+
+            var workspaceId = keyVault.WorkspaceId;
+            var query = @$"
 AzureDiagnostics 
-| where OperationName == 'SecretGet' and ResultType == 'Success'
+| where OperationName == 'SecretGet' and ResultType == 'Success' and requestUri_s startswith 'https://{keyVault.Name}.vault.azure.net/secrets/'
 | summarize count() by requestUri_s
 | project uri = requestUri_s, count = count_
 ";
 
-        var data = await client.QueryWorkspaceAsync(workspaceId, query, new QueryTimeRange(TimeSpan.FromHours(24)));
+            var data = await client.QueryWorkspaceAsync(workspaceId, query, new QueryTimeRange(TimeSpan.FromHours(48)));
 
-        var requestUriColumn = data.Value.Table.Columns.FindIndex(c => c.Name == "uri");
-        var countColumn = data.Value.Table.Columns.FindIndex(c => c.Name == "count");
+            var requestUriColumn = data.Value.Table.Columns.FindIndex(c => c.Name == "uri");
+            var countColumn = data.Value.Table.Columns.FindIndex(c => c.Name == "count");
 
-        if (!requestUriColumn.HasValue || !countColumn.HasValue)
-        {
-            return;
+            if (!requestUriColumn.HasValue || !countColumn.HasValue)
+            {
+                return;
+            }
+
+            var metrics = data.Value.Table.Rows.Select(r => new KeyVaultSecretMetric
+            {
+                KeyVaultName = args.State.KeyVaults[0].Name,
+                SecretName = Uri.TryCreate((string)r[requestUriColumn.Value], UriKind.Absolute, out var uri) ? (uri?.Segments[^1].Trim('/') ?? "") : "",
+                Reads = (long)r[countColumn.Value]
+            }).ToList();
+
+            if (!token.IsCancellationRequested)
+            {
+                Metrics.AddRange(metrics);
+
+                _mediator?.NotifyEvent(
+                    this,
+                    new MetricsLoadedEventArgs(args.State.KeyVaults[0].Name));
+            }
         }
-
-        var metrics = data.Value.Table.Rows.Select(r => new KeyVaultSecretMetric
-        {
-            KeyVaultName = args.State.KeyVaults[0].Name,
-            SecretName = Uri.TryCreate((string)r[requestUriColumn.Value], UriKind.Absolute, out var uri) ? uri.Segments[^1].Trim('/') : "",
-            Reads = (long)r[countColumn.Value]
-        }).ToList();
-
-        if (!token.IsCancellationRequested)
-        {
-            Metrics.AddRange(metrics);
-
-            _mediator?.NotifyEvent(
-                this,
-                new MetricsLoadedEventArgs(args.State.KeyVaults[0].Name));
-        }
-    }
-}
-
-internal class MetricsProviderMediatorEventRegistration : IMediatorEventListener
-{
-    private readonly IMetricsProvider _metricsProvider;
-    private IDisposable? _registration;
-
-    public MetricsProviderMediatorEventRegistration(IMetricsProvider metricsProvider)
-    {
-        _metricsProvider = metricsProvider;
-    }
-
-    public void RegisterListener(IMediator mediator)
-    {
-        _registration = mediator.RegisterCallback<StateChangedEventArgs>(_metricsProvider.ReadMetricsAsync);
-        _metricsProvider.AcceptMediator(mediator);
-    }
-
-    public void Dispose()
-    {
-        _registration?.Dispose();
-        _registration = null;
     }
 }

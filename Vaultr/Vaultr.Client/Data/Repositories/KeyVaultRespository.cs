@@ -20,14 +20,26 @@ public class KeyVaultRespository : IRepository
     public Task DeleteAsync(string id, IViewContext viewContext) => throw new NotImplementedException();
 
     public async Task<IEnumerable<IEntity>> GetAllAsync(IViewContext viewContext, IView view)
-        => (await _secretsProvider.GetAllSecretsAsync())
+    {
+        var isFirstPageRequest = view.Skip == 0 && string.IsNullOrEmpty(view.SearchTerm) && (view.ActiveTab == null || view.ActiveTab == 0);
+
+        var secrets = await _secretsProvider.GetAllSecretsAsync(isFirstPageRequest);
+
+        var data = secrets
             .Where(CompileQueryExpression(view))
-            .Where(x => view.SearchTerm == null || (x.Id != null && x.Id.Contains(view.SearchTerm, StringComparison.InvariantCultureIgnoreCase)));
+            .Where(x => view.SearchTerm == null || (x.Id != null && x.Id.Contains(view.SearchTerm, StringComparison.InvariantCultureIgnoreCase)))
+            .Skip(view.Skip)
+            .ToArray();
+
+        view.HasMoreData(isFirstPageRequest || data.Length > view.Take);
+
+        return data.Take(view.Take);
+    }
 
     private Func<KeyVaultSecretEntity, bool> CompileQueryExpression(IView view)
     {
         var expression = (view.ActiveDataView?.QueryExpression.Compile()) as Func<KeyVaultSecretEntity, bool>;
-        
+
         return expression ?? NoFilter;
     }
 

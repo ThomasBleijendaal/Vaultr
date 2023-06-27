@@ -8,7 +8,7 @@ public interface ISecretsProvider
 
     void ClearCache();
 
-    Task<IReadOnlyList<KeyVaultSecretEntity>> GetAllSecretsAsync();
+    Task<IReadOnlyList<KeyVaultSecretEntity>> GetAllSecretsAsync(bool firstPage);
 
     Task<string> GetSecretValueAsync(string keyVaultName, string keyName);
 

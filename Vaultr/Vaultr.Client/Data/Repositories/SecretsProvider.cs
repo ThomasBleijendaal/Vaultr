@@ -1,8 +1,10 @@
-﻿using Azure.Security.KeyVault.Secrets;
+﻿using System.Collections.Concurrent;
+using Azure.Security.KeyVault.Secrets;
 using RapidCMS.Core.Abstractions.Mediators;
 using RapidCMS.Core.Enums;
 using RapidCMS.Core.Extensions;
 using RapidCMS.Core.Models.EventArgs.Mediators;
+using Vaultr.Client.Core.Extensions;
 using Vaultr.Client.Data.Models;
 
 namespace Vaultr.Client.Data.Repositories;
@@ -14,6 +16,7 @@ public class SecretsProvider : ISecretsProvider
 
     private List<KeyVaultSecretEntity> _secrets = new();
     private Task _initTask;
+    private Task _firstPageTask;
 
     public SecretsProvider(
         ISecretClientsProvider secretClientsProvider,
@@ -21,6 +24,7 @@ public class SecretsProvider : ISecretsProvider
     {
         _secretClientsProvider = secretClientsProvider;
         _mediator = mediator;
+        _firstPageTask = new TaskCompletionSource().Task;
         _initTask = RefreshSecretCacheAsync();
     }
 
@@ -57,9 +61,9 @@ public class SecretsProvider : ISecretsProvider
         }
     }
 
-    public async Task<IReadOnlyList<KeyVaultSecretEntity>> GetAllSecretsAsync()
+    public async Task<IReadOnlyList<KeyVaultSecretEntity>> GetAllSecretsAsync(bool firstPage)
     {
-        await _initTask;
+        await (firstPage ? _firstPageTask : _initTask);
         return _secrets.ToList();
     }
 
@@ -89,41 +93,60 @@ public class SecretsProvider : ISecretsProvider
 
     private async Task RefreshSecretCacheAsync()
     {
-        var secrets = new List<KeyVaultSecretEntity>();
+        var firstPageTcs = new TaskCompletionSource();
 
-        var allKeyVaultSecrets = await _secretClientsProvider.Clients.Select(async x =>
+        _firstPageTask = firstPageTcs.Task;
+
+        var concurrentDictionary = new ConcurrentDictionary<string, KeyVaultSecretEntity>();
+
+        await foreach (var keyVaultSecret in _secretClientsProvider.Clients.ZipAsync(x => x.GetPropertiesOfSecretsAsync()))
         {
-            try
-            {
-                return (x.Key, await x.Value.GetPropertiesOfSecretsAsync().ToListAsync());
-            }
-            catch (Exception)
-            {
-                _mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Error, $"Failed to get secrets from {x.Key}."));
+            var keyVault = keyVaultSecret.Key;
+            var secret = keyVaultSecret.Value;
 
-                return (x.Key, new List<SecretProperties>());
-            }
-        }).ToListAsync();
-
-        foreach (var (key, keyVaultSecrets) in allKeyVaultSecrets)
-        {
-            foreach (var keyVaultSecret in keyVaultSecrets.Where(x => x.Managed == false))
+            if (secret.Managed)
             {
-                var secret = secrets.FirstOrDefault(x => x.Id == keyVaultSecret.Name);
-                if (secret == null)
+                continue;
+            }
+
+            concurrentDictionary.AddOrUpdate(secret.Name,
+                name => new KeyVaultSecretEntity
                 {
-                    secret = new KeyVaultSecretEntity
+                    Id = name,
+                    KeyVaultUris =
                     {
-                        Id = keyVaultSecret.Name
+                        { keyVault, secret.Id }
+                    }
+                },
+                (name, existingSecret) =>
+                {
+                    var newSecret = new KeyVaultSecretEntity
+                    {
+                        Id = name,
+                        KeyVaultUris = existingSecret.KeyVaultUris.ToDictionary(x => x.Key, x => x.Value)
                     };
-                    secrets.Add(secret);
-                }
 
-                secret.KeyVaultUris.Add(key, keyVaultSecret.Id);
+                    newSecret.KeyVaultUris[keyVault] = secret.Id;
+
+                    return newSecret;
+                });
+
+            if (!_firstPageTask.IsCompleted && concurrentDictionary.Count > 50)
+            {
+                // provide data for the first page
+                _secrets = concurrentDictionary.Values.OrderBy(x => x.Id).ToList();
+                firstPageTcs.SetResult();
             }
         }
 
-        _secrets = secrets.OrderBy(x => x.Id).ToList();
+        _secrets = concurrentDictionary.Values.OrderBy(x => x.Id).ToList();
+
+        _mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(
+            "vaultr::secrets",
+            "vaultr::secrets",
+            default,
+            default(string),
+            CrudType.Update));
     }
 
     private async Task SaveSecretAsync(string keyVaultName, string keyName, string keyValue)
@@ -157,7 +180,7 @@ public class SecretsProvider : ISecretsProvider
         }
         catch
         {
-
+            // there is no problem
         }
 
         if (hasDeletedSecret)

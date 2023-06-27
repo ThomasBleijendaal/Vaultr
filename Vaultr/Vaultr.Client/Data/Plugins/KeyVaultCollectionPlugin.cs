@@ -52,7 +52,7 @@ public class KeyVaultCollectionPlugin : IPlugin
             },
             UsageType = UsageType.List,
             ListEditor = new ListSetup(
-                20,
+                25,
                 true,
                 false,
                 ListType.Table,

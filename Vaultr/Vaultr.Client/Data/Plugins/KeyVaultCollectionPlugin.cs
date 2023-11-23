@@ -91,7 +91,7 @@ public class KeyVaultCollectionPlugin : IPlugin
                             new CustomPropertyFieldSetup(typeof(SecretEditor))
                             {
                                 Name = x.Name,
-                                Configuration = x.Name,
+                                Configuration = (e, v) => Task.FromResult<object?>(x.Name),
                                 Property = new PropertyMetadata<KeyVaultSecretEntity>(
                                     x.Name,
                                     typeof(string),

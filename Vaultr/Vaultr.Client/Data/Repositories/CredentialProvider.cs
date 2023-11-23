@@ -16,7 +16,12 @@ public class CredentialProvider : ICredentialProvider
 
         var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
         {
-            TenantId = tenantId
+            TenantId = tenantId,
+            TokenCachePersistenceOptions = new TokenCachePersistenceOptions
+            {
+                Name = "VaultR",
+                UnsafeAllowUnencryptedStorage = false
+            }
         });
 
         credential.Authenticate();

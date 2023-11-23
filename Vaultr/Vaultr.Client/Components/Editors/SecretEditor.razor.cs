@@ -19,7 +19,7 @@ public partial class SecretEditor
     {
         Nothing,
         Deleting,
-        Saving, 
+        Saving,
         Copying,
         Promoting,
         Demoting,
@@ -43,7 +43,8 @@ public partial class SecretEditor
 
     private Action IsDoing { get; set; }
 
-    private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
+    // .Result is allowed here because its configured by Task.FromResult
+    private string KeyVaultName => Configuration?.Invoke(Entity, EditContext.EntityState).Result as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
 
     private string? NextKeyVaultName => CanPromote == true ? SecretsProvider.NextKeyVaultName(KeyVaultName) : null;
     private string? PreviousKeyVaultName => CanDemote == true ? SecretsProvider.PreviousKeyVaultName(KeyVaultName) : null;

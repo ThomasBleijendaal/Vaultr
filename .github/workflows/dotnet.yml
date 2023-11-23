@@ -20,10 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 6
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
           include-prerelease: true
 
       - name: Setup MSBuild
@@ -31,6 +31,10 @@ jobs:
         with:
           vs-prerelease: true
       
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
@@ -46,7 +50,12 @@ jobs:
       - name: Build MAUI Windows
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net6.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+
+      - name: Build MAUI Windows
+        run: |
+          cd Vaultr/Vaultr.Client
+          dotnet publish -f net8.0-maccatalyst -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
 
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
@@ -55,4 +64,45 @@ jobs:
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/win10-x64/AppPackages/**/*
+          path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows*/win10-x64/AppPackages/**/*
+      
+      - name: release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ steps.date.outputs.date }}
+          tag_name: ${{ steps.date.outputs.date }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: upload windows artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+          asset_name: Vaultr.Client_windows_x64.msix
+          asset_content_type: application/msix
+
+      # - name: upload windows artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+      #     asset_name: Vaultr.Client_windows_x64.msix
+      #     asset_content_type: application/msix
+
+      - name: upload mac artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+          asset_name: Vaultr.Client_windows_x64.msix
+          asset_content_type: application/msix

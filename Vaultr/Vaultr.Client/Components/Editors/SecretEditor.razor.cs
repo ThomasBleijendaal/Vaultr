@@ -253,20 +253,23 @@ public partial class SecretEditor
                 try
                 {
                     var usernamePassword = Encoding.UTF8.GetString(Convert.FromBase64String(currentValue)) ?? "";
-                    if (usernamePassword?.Contains(":") ?? false)
+                    if (usernamePassword.Contains(':'))
                     {
                         var usernamePasswordSplit = usernamePassword.Split(':');
                         items[0] = usernamePasswordSplit[0];
                         items[1] = usernamePasswordSplit[1];
                     }
                 }
-                catch { }
+                catch
+                {
+                    // don't care
+                }
 
                 if (copyType == CopyType.BasicAuthUsername)
                 {
                     items[0] = secretValue;
                 }
-                else if (copyType == CopyType.BasicAuthPassword)
+                else
                 {
                     items[1] = secretValue;
                 }

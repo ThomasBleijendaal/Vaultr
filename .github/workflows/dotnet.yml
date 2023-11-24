@@ -86,7 +86,7 @@ jobs:
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release -p:CreatePackage=false
+          dotnet publish -f net8.0-maccatalyst -c Release
 
       - name: Upload Mac Artifact
         uses: actions/upload-artifact@v2.3.1
@@ -97,6 +97,13 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/publish/Vaultr.Client-1.0.app"
+          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

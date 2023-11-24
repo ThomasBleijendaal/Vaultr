@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v2.3.1
         with:
           name: mac-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/publish/*
+          path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
       
       - name: Publish
         uses: softprops/action-gh-release@v1

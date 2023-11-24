@@ -1,11 +1,8 @@
 name: CI Build
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-permissions:
-  contents: read
+  release:
+    types: [published]
 
 env:
   DOTNET_NOLOGO: true                     # Disable the .NET logo
@@ -55,60 +52,67 @@ jobs:
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1
         with:
-          name: windows-ci-build
+          name: mac-ci-build
           path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows*/win10-x64/AppPackages/**/*
 
-      - name: Build MAUI Mac
-        run: |
-          cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+      # - name: Build MAUI Mac
+      #   run: |
+      #     cd Vaultr/Vaultr.Client
+      #     dotnet publish -f net8.0-maccatalyst -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
 
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
 
-      - name: Upload Mac Artifact
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
+      # - name: Upload Mac Artifact
+      #   uses: actions/upload-artifact@v2.3.1
+      #   with:
+      #     name: windows-ci-build
+      #     path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
       
-      - name: release
-        uses: actions/create-release@v1
-        id: create_release
+      - name: Publish
+        uses: softprops/action-gh-release@v1
         with:
-          draft: false
-          prerelease: false
-          release_name: ${{ steps.date.outputs.date }}
-          tag_name: ${{ steps.date.outputs.date }}
+          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*"
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: upload windows artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
-          asset_name: Vaultr.Client_windows_x64.msix
-          asset_content_type: application/msix
+      # - name: release
+      #   uses: actions/create-release@v1
+      #   id: create_release
+      #   with:
+      #     draft: false
+      #     prerelease: false
+      #     release_name: ${{ steps.date.outputs.date }}
+      #     tag_name: ${{ steps.date.outputs.date }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
 
-      - name: upload windows artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.cer
-          asset_name: Vaultr.Client_windows_x64.cer
-          asset_content_type: application/pkix-cert
+      # - name: upload windows artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+      #     asset_name: Vaultr.Client_windows_x64.msix
+      #     asset_content_type: application/msix
 
-      - name: upload mac artifact
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
-          asset_name: Vaultr.Client_windows_x64.msix
-          asset_content_type: application/msix
+      # - name: upload windows artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.cer
+      #     asset_name: Vaultr.Client_windows_x64.cer
+      #     asset_content_type: application/pkix-cert
+
+      # - name: upload mac artifact
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ github.token }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+      #     asset_name: Vaultr.Client_windows_x64.msix
+      #     asset_content_type: application/msix

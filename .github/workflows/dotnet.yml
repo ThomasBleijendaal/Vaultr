@@ -89,8 +89,8 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
-      - name: Remove the pfx
-        run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
+      # - name: Remove the pfx
+      #   run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
       
       - name: Build MAUI Mac
         run: |

@@ -77,11 +77,11 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - name: Decode the pfx
-        run: |
-          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificatePath = "Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
-          [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+      # - name: Decode the pfx
+      #   run: |
+      #     $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
+      #     $certificatePath = "Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
+      #     [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
       - name: Install MAUI Workloads
         run: |
@@ -89,18 +89,13 @@ jobs:
       - name: Restore Dependencies
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
-      - name: Build MAUI Windows
-        run: |
-          cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
-
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
       
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+          dotnet publish -f net8.0-maccatalyst -c Release
 
       - name: Upload Mac Artifact
         uses: actions/upload-artifact@v2.3.1

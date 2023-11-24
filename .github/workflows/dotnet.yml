@@ -88,22 +88,36 @@ jobs:
           cd Vaultr/Vaultr.Client
           dotnet publish -f net8.0-maccatalyst -c Release
 
-      - name: Upload Mac Artifact
-        uses: actions/upload-artifact@v2.3.1
+      # - name: Upload Mac Artifact
+      #   uses: actions/upload-artifact@v2.3.1
+      #   with:
+      #     name: mac-ci-build
+      #     path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
+    
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
         with:
-          name: mac-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
+          type: 'zip'
+          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          filename: 'maccatalyst-arm64-app.zip'
+      
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
+          filename: 'maccatalyst-x64-app.zip'
       
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          files: maccatalyst-arm64-app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
+          files: maccatalyst-x64-app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

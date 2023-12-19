@@ -14,6 +14,12 @@ public class CredentialProvider : ICredentialProvider
             return _credentials[tenantId];
         }
 
+#if MACCATALYST
+        var credential = new AzureCliCredential(new AzureCliCredentialOptions
+        {
+            TenantId = tenantId
+        });
+#else
         var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
         {
             TenantId = tenantId,
@@ -25,6 +31,7 @@ public class CredentialProvider : ICredentialProvider
         });
 
         credential.Authenticate();
+#endif
 
         return _credentials[tenantId] = credential;
     }

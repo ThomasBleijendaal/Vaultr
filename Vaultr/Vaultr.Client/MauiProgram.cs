@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using RapidCMS.Core.Abstractions.Plugins;
 using Vaultr.Client.Components.Authentication;
@@ -15,6 +16,8 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
+        Environment.CurrentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()

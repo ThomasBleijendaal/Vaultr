@@ -19,7 +19,7 @@ public partial class SecretEditor
     {
         Nothing,
         Deleting,
-        Saving, 
+        Saving,
         Copying,
         Promoting,
         Demoting,
@@ -43,7 +43,8 @@ public partial class SecretEditor
 
     private Action IsDoing { get; set; }
 
-    private string KeyVaultName => Configuration as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
+    // .Result is allowed here because its configured by Task.FromResult
+    private string KeyVaultName => Configuration?.Invoke(Entity, EditContext.EntityState).Result as string ?? throw new InvalidOperationException("Missing keyvault name in Configuration");
 
     private string? NextKeyVaultName => CanPromote == true ? SecretsProvider.NextKeyVaultName(KeyVaultName) : null;
     private string? PreviousKeyVaultName => CanDemote == true ? SecretsProvider.PreviousKeyVaultName(KeyVaultName) : null;
@@ -252,20 +253,23 @@ public partial class SecretEditor
                 try
                 {
                     var usernamePassword = Encoding.UTF8.GetString(Convert.FromBase64String(currentValue)) ?? "";
-                    if (usernamePassword?.Contains(":") ?? false)
+                    if (usernamePassword.Contains(':'))
                     {
                         var usernamePasswordSplit = usernamePassword.Split(':');
                         items[0] = usernamePasswordSplit[0];
                         items[1] = usernamePasswordSplit[1];
                     }
                 }
-                catch { }
+                catch
+                {
+                    // don't care
+                }
 
                 if (copyType == CopyType.BasicAuthUsername)
                 {
                     items[0] = secretValue;
                 }
-                else if (copyType == CopyType.BasicAuthPassword)
+                else
                 {
                     items[1] = secretValue;
                 }

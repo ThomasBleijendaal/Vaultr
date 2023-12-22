@@ -14,14 +14,14 @@ namespace Vaultr.Client.WinUI;
 /// </summary>
 public partial class App : MauiWinUIApplication
 {
-    private NotificationService _notificationService;
+    private NotificationService? _notificationService = null;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
     /// </summary>
     public App()
-    { 
+    {
         InitializeComponent();
     }
 
@@ -42,6 +42,11 @@ public partial class App : MauiWinUIApplication
 
         var _windowHandle = WindowNative.GetWindowHandle(currentWindow);
         var windowId = Win32Interop.GetWindowIdFromWindow(_windowHandle);
+
+        if (_notificationService == null)
+        {
+            return;
+        }
 
         _notificationService.TitleChanged += (s, e) =>
         {

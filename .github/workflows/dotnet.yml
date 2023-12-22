@@ -1,11 +1,8 @@
 name: CI Build
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-permissions:
-  contents: read
+  release:
+    types: [published]
 
 env:
   DOTNET_NOLOGO: true                     # Disable the .NET logo
@@ -14,23 +11,22 @@ env:
 
 jobs:
   build-windows:
-    runs-on: windows-2022
+    runs-on: windows-latest
     name: Windows Build
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 6
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
           include-prerelease: true
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1.1
-        with:
-          vs-prerelease: true
-      
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
@@ -46,13 +42,82 @@ jobs:
       - name: Build MAUI Windows
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net6.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
+          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx
 
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
-
+        
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1
         with:
           name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net6.0-windows*/win10-x64/AppPackages/**/*
+          path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows*/win10-x64/AppPackages/**/*
+
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-mac:
+    runs-on: macos-latest
+    name: Mac Build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 8.0.x
+          include-prerelease: true
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Install MAUI Workloads
+        run: |
+          dotnet workload install maui --ignore-failed-sources
+      - name: Restore Dependencies
+        run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
+
+      - name: Build MAUI Mac
+        run: |
+          cd Vaultr/Vaultr.Client
+          dotnet publish -f net8.0-maccatalyst -c Release
+
+      # - name: Upload Mac Artifact
+      #   uses: actions/upload-artifact@v2.3.1
+      #   with:
+      #     name: mac-ci-build
+      #     path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
+    
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          filename: 'maccatalyst-arm64-app.zip'
+      
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
+          filename: 'maccatalyst-x64-app.zip'
+      
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: maccatalyst-arm64-app.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: maccatalyst-x64-app.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

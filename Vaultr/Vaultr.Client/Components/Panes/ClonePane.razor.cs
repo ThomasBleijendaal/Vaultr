@@ -15,7 +15,7 @@ public partial class ClonePane
     [Inject]
     private IMediator Mediator { get; set; } = null!;
 
-    public CloneModel Clone = new CloneModel();
+    public CloneModel Clone { get; set; } = new CloneModel();
 
     private KeyVaultSecretEntity? _secret;
 
@@ -49,12 +49,13 @@ public partial class ClonePane
         }
         catch
         {
+            // don't care
         }
 
         ButtonClicked(CrudType.Refresh);
     }
 
-    private async Task CloneSecretAsync(CloneModel.KeyVaultClone? kv)
+    private async Task CloneSecretAsync(CloneModel.KeyVaultClone kv)
     {
         Mediator.NotifyEvent(this, new MessageEventArgs(MessageType.Information, $"Cloning secret to {kv.Name}.."));
 

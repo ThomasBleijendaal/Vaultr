@@ -14,12 +14,24 @@ public class CredentialProvider : ICredentialProvider
             return _credentials[tenantId];
         }
 
-        var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+#if MACCATALYST
+        var credential = new AzureCliCredential(new AzureCliCredentialOptions
         {
             TenantId = tenantId
         });
+#else
+        var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+        {
+            TenantId = tenantId,
+            TokenCachePersistenceOptions = new TokenCachePersistenceOptions
+            {
+                Name = "VaultR",
+                UnsafeAllowUnencryptedStorage = false
+            }
+        });
 
         credential.Authenticate();
+#endif
 
         return _credentials[tenantId] = credential;
     }

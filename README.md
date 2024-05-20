@@ -3,5 +3,4 @@ A MAUI application to manage multiple KeyVaults at the same time, making compari
 
 ![Vaultr](readme.png)
 
-Download the latest build from the [releases](https://github.com/ThomasBleijendaal/Vaultr/releases) page (sometimes you need to install the .cer file first before running the msix.). 
-Or download the latest Visual Studio with MAUI workload and Compile and Deploy Vaultr yourself. 
+Download the latest build from the [releases](https://github.com/ThomasBleijendaal/Vaultr/releases) page. To install using the MSIX use [this documentation from Microsoft](https://learn.microsoft.com/en-us/dotnet/maui/windows/deployment/publish-cli?view=net-maui-8.0#installing-the-app). Or download the latest Visual Studio with MAUI workload and Compile and Deploy Vaultr yourself. 

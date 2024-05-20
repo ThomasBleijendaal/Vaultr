@@ -42,7 +42,7 @@ jobs:
       - name: Build MAUI Windows
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx -p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}
+          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=GitHubActionsWorkflow.pfx -p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }} -p:PackageCertificateThumbprint=${{ secrets.PFX_THUMB }}
 
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx

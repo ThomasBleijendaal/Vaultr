@@ -16,7 +16,7 @@ public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()
     {
-        Environment.CurrentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+        Environment.CurrentDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule!.FileName)!;
 
         var builder = MauiApp.CreateBuilder();
         builder

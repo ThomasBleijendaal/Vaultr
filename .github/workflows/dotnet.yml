@@ -26,23 +26,28 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - name: Decode the pfx
+      - name: Create the pfx
         run: |
-          $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificatePath = "./Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
-          [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
+          New-SelfSignedCertificate -Type Custom `
+            -Subject "CN=Vaultr" `
+            -KeyUsage DigitalSignature `
+            -FriendlyName "Vaultr" `
+            -CertStoreLocation "Cert:\CurrentUser\My" `
+            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
 
       - name: Install MAUI Workloads
         run: |
           dotnet workload install maui --ignore-failed-sources
+      
       - name: Restore Dependencies
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
       - name: Build MAUI Windows
         run: |
-          cd Vaultr/Vaultr.Client
-          ls
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release 
+          $cer = Get-ChildItem "Cert:\CurrentUser\My" | Where-Object { $_.Subject -eq 'CN=Vaultr' } | Select-Object Thumbprint -First 1
+          $thumbprint = $cer.Thumbprint
+
+          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
   
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1

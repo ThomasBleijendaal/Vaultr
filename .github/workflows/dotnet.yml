@@ -1,8 +1,8 @@
 name: CI Build
 
-on:
-  release:
-    types: [published]
+on: [push]
+  #release:
+  #  types: [published]
 
 env:
   DOTNET_NOLOGO: true                     # Disable the .NET logo
@@ -30,7 +30,7 @@ jobs:
       - name: Decode the pfx
         run: |
           $pfx_cert_byte = [System.Convert]::FromBase64String("${{ secrets.BASE64_ENCODED_PFX }}")
-          $certificatePath = "Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
+          $certificatePath = "./Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx"
           [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
 
       - name: Install MAUI Workloads
@@ -42,6 +42,7 @@ jobs:
       - name: Build MAUI Windows
         run: |
           cd Vaultr/Vaultr.Client
+          ls
           dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile=.\GitHubActionsWorkflow.pfx -p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}
 
       - name: Remove the pfx

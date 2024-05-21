@@ -44,10 +44,7 @@ jobs:
           cd Vaultr/Vaultr.Client
           ls
           dotnet publish -f net8.0-windows10.0.19041.0 -c Release 
-
-      - name: Remove the pfx
-        run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx
-        
+  
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v2.3.1
         with:

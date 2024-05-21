@@ -43,7 +43,7 @@ jobs:
         run: |
           cd Vaultr/Vaultr.Client
           ls
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateKeyFile="D:\a\Vaultr\Vaultr\Vaultr\Vaultr.Client\GitHubActionsWorkflow.pfx" -p:PackageCertificatePassword=${{ secrets.PFX_PASSWORD }}
+          dotnet publish -f net8.0-windows10.0.19041.0 -c Release 
 
       - name: Remove the pfx
         run: Remove-Item -path Vaultr/Vaultr.Client/GitHubActionsWorkflow.pfx

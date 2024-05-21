@@ -47,6 +47,8 @@ jobs:
           $cer = Get-ChildItem "Cert:\CurrentUser\My" | Where-Object { $_.Subject -eq 'CN=Vaultr' } | Select-Object Thumbprint -First 1
           $thumbprint = $cer.Thumbprint
 
+          Write-Host "Thumbprint: $thumprint"
+
           cd Vaultr/Vaultr.Client
 
           dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint

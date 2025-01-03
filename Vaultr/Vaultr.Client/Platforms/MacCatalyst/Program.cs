@@ -1,4 +1,5 @@
 ﻿using UIKit;
+using Vaultr.Client.Platforms.MacCatalyst;
 
 namespace Vaultr.Client
 {

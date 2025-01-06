@@ -73,10 +73,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
           include-prerelease: true
 
       - name: Get current date
@@ -92,26 +92,26 @@ jobs:
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release
+          dotnet publish -f net9.0-maccatalyst -c Release
 
-      # - name: Upload Mac Artifact
-      #   uses: actions/upload-artifact@v2.3.1
-      #   with:
-      #     name: mac-ci-build
-      #     path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
+      - name: Upload Mac Artifact
+        uses: actions/upload-artifact@v2.3.1
+        with:
+          name: mac-ci-build
+          path: Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/*
     
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          path: "Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
           filename: 'maccatalyst-arm64-app.zip'
       
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
+          path: "Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
           filename: 'maccatalyst-x64-app.zip'
       
       - name: Publish

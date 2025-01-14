@@ -78,8 +78,7 @@ jobs:
 
       - task: CmdLine@2
         displayName: 'Select XCode 16 explicitly'
-        inputs:
-          script: 'sudo xcode-select -s /Applications/Xcode_16.app'
+        run: sudo xcode-select -s /Applications/Xcode_16.app
 
       - name: Install MAUI Workloads
         run: |

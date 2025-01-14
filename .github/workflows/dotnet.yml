@@ -76,6 +76,11 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
+      - task: CmdLine@2
+        displayName: 'Select XCode 16 explicitly'
+        inputs:
+          script: 'sudo xcode-select -s /Applications/Xcode_16.app'
+
       - name: Install MAUI Workloads
         run: |
           dotnet workload install maui --ignore-failed-sources

@@ -100,7 +100,7 @@ jobs:
           type: 'zip'
           directory: "./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64"
           path: "Vaultr.Client.app"
-          filename: 'maccatalyst-arm64-app.zip'
+          filename: 'Vaultr.Client.app.zip'
       
       # - name: Archive Release
       #   uses: thedoctor0/zip-release@0.7.5

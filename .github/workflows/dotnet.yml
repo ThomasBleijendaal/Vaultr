@@ -77,7 +77,10 @@ jobs:
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
       - name: Select XCode 16 explicitly
-        run: sudo xcode-select -s /Applications/Xcode_16.app
+        run: |
+          ls /Applications | grep 'Xcode'
+          echo
+          sudo xcode-select -s /Applications/Xcode_16.app
 
       - name: Install MAUI Workloads
         run: |

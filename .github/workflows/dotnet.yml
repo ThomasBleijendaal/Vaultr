@@ -98,8 +98,8 @@ jobs:
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          directory: "./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64"
-          path: "Vaultr.Client.app"
+          directory: "./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          path: "."
           filename: 'Vaultr.Client.app.zip'
       
       # - name: Archive Release
@@ -113,7 +113,7 @@ jobs:
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: ./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app.zip
+          files: ./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app/Vaultr.Client.app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       

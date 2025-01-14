@@ -1,8 +1,8 @@
 name: CI Build
 
-on: [push]
-  #release:
-  #  types: [published]
+on:
+  release:
+    types: [published]
 
 env:
   DOTNET_NOLOGO: true                     # Disable the .NET logo
@@ -17,10 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Get current date
         id: date
@@ -51,18 +51,12 @@ jobs:
 
           cd Vaultr/Vaultr.Client
 
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
+          dotnet publish -f net9.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
   
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows*/win10-x64/AppPackages/**/*
-
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*"
+          files: "Vaultr/Vaultr.Client/bin/Release/net9.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,57 +67,59 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 8.0.x
-          include-prerelease: true
+          dotnet-version: 9.0.x
 
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
+      - name: Select XCode 16 explicitly
+        run: |
+          ls /Applications | grep 'Xcode'
+          echo
+          sudo xcode-select -s /Applications/Xcode_16.2.app
+
       - name: Install MAUI Workloads
         run: |
           dotnet workload install maui --ignore-failed-sources
+      
       - name: Restore Dependencies
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release
+          dotnet publish -f net9.0-maccatalyst -c Release
 
-      # - name: Upload Mac Artifact
-      #   uses: actions/upload-artifact@v2.3.1
+      - name: Archive Release
+        uses: thedoctor0/zip-release@0.7.5
+        with:
+          type: 'zip'
+          directory: "./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          path: "."
+          filename: 'Vaultr.Client.app.zip'
+      
+      # - name: Archive Release
+      #   uses: thedoctor0/zip-release@0.7.5
       #   with:
-      #     name: mac-ci-build
-      #     path: Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/*
-    
-      - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
-          filename: 'maccatalyst-arm64-app.zip'
-      
-      - name: Archive Release
-        uses: thedoctor0/zip-release@0.7.5
-        with:
-          type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
-          filename: 'maccatalyst-x64-app.zip'
+      #     type: 'zip'
+      #     directory: "./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-x64"
+      #     path: "Vaultr.Client.app"
+      #     filename: 'Vaultr.Client.app.zip'
       
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: maccatalyst-arm64-app.zip
+          files: ./Vaultr/Vaultr.Client/bin/Release/net9.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app/Vaultr.Client.app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        with:
-          files: maccatalyst-x64-app.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Publish
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: maccatalyst-x64-app.zip
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

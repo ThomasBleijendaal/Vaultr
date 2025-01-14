@@ -6,14 +6,11 @@ namespace Vaultr.Client.Core.Providers;
 
 public class ClientSpecifiedAuthenticationStateProvider : AuthenticationStateProvider
 {
-    private readonly NotificationService _notificationService;
     private readonly IConfigurationStateProvider _configurationStateProvider;
 
     public ClientSpecifiedAuthenticationStateProvider(
-        NotificationService notificationService,
         IConfigurationStateProvider configurationStateProvider)
     {
-        _notificationService = notificationService;
         _configurationStateProvider = configurationStateProvider;
     }
 
@@ -30,8 +27,6 @@ public class ClientSpecifiedAuthenticationStateProvider : AuthenticationStatePro
             id.AddClaim(new Claim(ClaimTypes.Name, "Anonymous"));
 
             var principal = new ClaimsPrincipal(id);
-
-            _notificationService.UpdateTitle($"{state.Name ?? "Vaultr"} - {state.TenantId}");
 
             return Task.FromResult(new AuthenticationState(principal));
         }

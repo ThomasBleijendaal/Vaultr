@@ -51,7 +51,7 @@ jobs:
 
           cd Vaultr/Vaultr.Client
 
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
+          dotnet publish -f net9.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
   
       - name: Publish
         uses: softprops/action-gh-release@v1
@@ -85,7 +85,7 @@ jobs:
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release
+          dotnet publish -f net9.0-maccatalyst -c Release
 
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5

@@ -80,7 +80,7 @@ jobs:
         run: |
           ls /Applications | grep 'Xcode'
           echo
-          sudo xcode-select -s /Applications/Xcode_16.app
+          sudo xcode-select -s /Applications/Xcode_16.2.app
 
       - name: Install MAUI Workloads
         run: |

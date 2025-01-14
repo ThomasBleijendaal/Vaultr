@@ -17,10 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Get current date
         id: date
@@ -67,11 +67,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 9
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 8.0.x
-          include-prerelease: true
+          dotnet-version: 9.0.x
 
       - name: Get current date
         id: date

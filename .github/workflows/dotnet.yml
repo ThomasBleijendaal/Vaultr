@@ -76,13 +76,13 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
 
-      - task: CmdLine@2
-        displayName: 'Select XCode 16 explicitly'
+      - name: Select XCode 16 explicitly
         run: sudo xcode-select -s /Applications/Xcode_16.app
 
       - name: Install MAUI Workloads
         run: |
           dotnet workload install maui --ignore-failed-sources
+      
       - name: Restore Dependencies
         run: dotnet restore Vaultr/Vaultr.Client/Vaultr.Client.csproj
 

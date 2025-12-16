@@ -349,3 +349,10 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 Vaultr/Vaultr.Functions/Properties
+.DS_Store
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+**/.idea/**/contentModel.xml
+**/.idea/**/modules.xml

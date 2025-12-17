@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31808.319
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11222.15 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vaultr.Client", "Vaultr.Client\Vaultr.Client.csproj", "{A19EFF57-4085-4355-BCFC-CAF175C4F813}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vaultr.Client", "Vaultr.Client\Vaultr.Client.csproj", "{FA7AD8DE-447B-4095-9050-834DC7078993}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,11 +11,11 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A19EFF57-4085-4355-BCFC-CAF175C4F813}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA7AD8DE-447B-4095-9050-834DC7078993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA7AD8DE-447B-4095-9050-834DC7078993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA7AD8DE-447B-4095-9050-834DC7078993}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FA7AD8DE-447B-4095-9050-834DC7078993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA7AD8DE-447B-4095-9050-834DC7078993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

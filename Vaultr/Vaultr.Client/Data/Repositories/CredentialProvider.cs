@@ -23,24 +23,25 @@ public class CredentialProvider : ICredentialProvider
                 return value;
             }
 
-#if MACCATALYST
-            var credential = new AzureCliCredential(new AzureCliCredentialOptions
-            {
-                TenantId = tenantId
-            });
-#else
-            var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
+            //#if MACCATALYST
+            //            var credential = new AzureCliCredential(new AzureCliCredentialOptions
+            //            {
+            //                TenantId = tenantId
+            //            });
+            //#else
+
+            var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
             {
                 TenantId = tenantId,
-                TokenCachePersistenceOptions = new TokenCachePersistenceOptions
-                {
-                    Name = "VaultR",
-                    UnsafeAllowUnencryptedStorage = false
-                }
+                ExcludeInteractiveBrowserCredential = false,
+                ExcludeEnvironmentCredential = true,
+                ExcludeManagedIdentityCredential = true,
+                ExcludeWorkloadIdentityCredential = true,
+                ExcludeBrokerCredential = true
             });
 
-            credential.Authenticate();
-#endif
+            //credential.GetTokenAsync()''.Authenticate();
+            //#endif
 
             return _credentials[tenantId] = credential;
         }

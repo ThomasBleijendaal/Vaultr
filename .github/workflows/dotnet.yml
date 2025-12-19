@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: windows-ci-build
-          path: D:/a/Vaultr/Vaultr/Vaultr/Vaultr.Client/bin/Release/net10.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*
+          path: D:\a\Vaultr\Vaultr\Vaultr\Vaultr.Client\bin\Release\net10.0-windows10.0.19041.0\win-x64\AppPackages\Vaultr.Client_1.0.0.1_Test\*
 
       - name: Publish
         uses: softprops/action-gh-release@v1

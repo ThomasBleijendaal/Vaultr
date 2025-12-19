@@ -57,6 +57,10 @@ jobs:
 
           tree
 
+      - name: See files
+        run: |
+          tree
+
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:

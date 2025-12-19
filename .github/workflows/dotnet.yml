@@ -52,12 +52,16 @@ jobs:
           cd Vaultr/Vaultr.Client
 
           dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
+
+          cd bin/Release
+
+          tree
   
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: windows-ci-build
-          path: D:/a/Vaultr/Vaultr/Vaultr/Vaultr.Client/bin/Release/net10.0-windows*/win10-x64/AppPackages/**/*
+          path: D:/a/Vaultr/Vaultr/Vaultr/Vaultr.Client/bin/Release/net10.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*
 
       - name: Publish
         uses: softprops/action-gh-release@v1

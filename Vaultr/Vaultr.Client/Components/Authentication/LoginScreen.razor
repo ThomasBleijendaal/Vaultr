@@ -32,13 +32,8 @@
         <div class="form-group">
             <label>KeyVaults</label>
 
-            @foreach (var kv in NewConfig.KeyVaults)
-            {
-                <InputText @bind-Value=kv.Name class="form-control" />
-            }
+            <InputTextArea @bind-Value=NewConfig.KeyVaultsAsString class="form-control" rows="6"></InputTextArea>
         </div>
-
-        <button class="btn btn-light" type="button" @onclick=@((e) => NewConfig.KeyVaults.Add(new ConfigurationState.KeyVaultConfiguration()))>Add KeyVault</button>
 
         <hr />
 

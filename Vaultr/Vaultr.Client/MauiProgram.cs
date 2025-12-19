@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Logging;
 using RapidCMS.Core.Abstractions.Plugins;
 using Vaultr.Client.Components.Authentication;
 using Vaultr.Client.Core;
@@ -27,8 +28,10 @@ public static class MauiProgram
             });
 
         builder.Services.AddMauiBlazorWebView();
+
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
+        builder.Logging.AddDebug();
 #endif
 
         builder.Services.AddMemoryCache();

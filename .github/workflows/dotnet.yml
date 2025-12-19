@@ -17,10 +17,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
 
       - name: Get current date
         id: date
@@ -51,18 +51,14 @@ jobs:
 
           cd Vaultr/Vaultr.Client
 
-          dotnet publish -f net8.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
-  
-      - name: Upload Windows Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-ci-build
-          path: Vaultr/Vaultr.Client/bin/Release/net8.0-windows*/win10-x64/AppPackages/**/*
+          dotnet publish -f net10.0-windows10.0.19041.0 -c Release -p:PackageCertificateThumbprint=$thumbprint
 
       - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "Vaultr/Vaultr.Client/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.*"
+          files: |
+            ./Vaultr/Vaultr.Client/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.msix
+            ./Vaultr/Vaultr.Client/bin/Release/net10.0-windows10.0.19041.0/win-x64/AppPackages/Vaultr.Client_1.0.0.1_Test/Vaultr.Client_1.0.0.1_x64.cer
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -73,10 +69,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup .NET 8
+      - name: Setup .NET 10
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 10.0.x
           include-prerelease: true
 
       - name: Get current date
@@ -92,7 +88,7 @@ jobs:
       - name: Build MAUI Mac
         run: |
           cd Vaultr/Vaultr.Client
-          dotnet publish -f net8.0-maccatalyst -c Release
+          dotnet publish -f net10.0-maccatalyst -c Release
 
       # - name: Upload Mac Artifact
       #   uses: actions/upload-artifact@v4
@@ -104,14 +100,14 @@ jobs:
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
+          path: "Vaultr/Vaultr.Client/bin/Release/net10.0-maccatalyst/maccatalyst-arm64/Vaultr.Client.app"
           filename: 'maccatalyst-arm64-app.zip'
       
       - name: Archive Release
         uses: thedoctor0/zip-release@0.7.5
         with:
           type: 'zip'
-          path: "Vaultr/Vaultr.Client/bin/Release/net8.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
+          path: "Vaultr/Vaultr.Client/bin/Release/net10.0-maccatalyst/maccatalyst-x64/Vaultr.Client.app"
           filename: 'maccatalyst-x64-app.zip'
       
       - name: Publish

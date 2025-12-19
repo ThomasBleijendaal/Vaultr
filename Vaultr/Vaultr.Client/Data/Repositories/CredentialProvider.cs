@@ -9,31 +9,42 @@ public class CredentialProvider : ICredentialProvider
 
     public TokenCredential GetTokenCredential(string tenantId)
     {
-        if (_credentials.ContainsKey(tenantId))
         {
-            return _credentials[tenantId];
+            if (_credentials.TryGetValue(tenantId, out var value))
+            {
+                return value;
+            }
         }
 
-#if MACCATALYST
-        var credential = new AzureCliCredential(new AzureCliCredentialOptions
+        lock (_credentials)
         {
-            TenantId = tenantId
-        });
-#else
-        var credential = new InteractiveBrowserCredential(new InteractiveBrowserCredentialOptions
-        {
-            TenantId = tenantId,
-            TokenCachePersistenceOptions = new TokenCachePersistenceOptions
+            if (_credentials.TryGetValue(tenantId, out var value))
             {
-                Name = "VaultR",
-                UnsafeAllowUnencryptedStorage = false
+                return value;
             }
-        });
 
-        credential.Authenticate();
-#endif
+            //#if MACCATALYST
+            //            var credential = new AzureCliCredential(new AzureCliCredentialOptions
+            //            {
+            //                TenantId = tenantId
+            //            });
+            //#else
 
-        return _credentials[tenantId] = credential;
+            var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
+            {
+                TenantId = tenantId,
+                ExcludeInteractiveBrowserCredential = false,
+                ExcludeEnvironmentCredential = true,
+                ExcludeManagedIdentityCredential = true,
+                ExcludeWorkloadIdentityCredential = true,
+                ExcludeBrokerCredential = true
+            });
+
+            //credential.GetTokenAsync()''.Authenticate();
+            //#endif
+
+            return _credentials[tenantId] = credential;
+        }
     }
 }
 

@@ -67,8 +67,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            D:\a\Vaultr\Vaultr\Vaultr\Vaultr.Client\bin\Release\net10.0-windows10.0.19041.0\win-x64\AppPackages\Vaultr.Client_1.0.0.1_Test\Vaultr.Client_1.0.0.1_x64.msix
-            D:\a\Vaultr\Vaultr\Vaultr\Vaultr.Client\bin\Release\net10.0-windows10.0.19041.0\win-x64\AppPackages\Vaultr.Client_1.0.0.1_Test\Vaultr.Client_1.0.0.1_x64.cer
+            bin\Release\net10.0-windows10.0.19041.0\win-x64\AppPackages\Vaultr.Client_1.0.0.1_Test\Vaultr.Client_1.0.0.1_x64.*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

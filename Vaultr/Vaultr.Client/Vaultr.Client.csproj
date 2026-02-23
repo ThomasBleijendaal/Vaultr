@@ -31,7 +31,7 @@
     <ApplicationVersion>1</ApplicationVersion>
 
     <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
-    <WindowsPackageType Condition="'$(Configuration)'=='DEBUG'">None</WindowsPackageType>
+    <WindowsPackageType Condition="'$(Configuration)'=='DEBUG'">MSIX</WindowsPackageType>
 
     <AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
     <WindowsPackageType Condition="'$(Configuration)'=='RELEASE'">MSIX</WindowsPackageType>

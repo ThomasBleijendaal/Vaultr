@@ -63,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-mac:
-    runs-on: macos-latest
+    runs-on: macos-26
     name: Mac Build
     steps:
       - name: Checkout

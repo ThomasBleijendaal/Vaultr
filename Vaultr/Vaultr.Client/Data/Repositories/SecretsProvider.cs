@@ -141,6 +141,11 @@ public class SecretsProvider : ISecretsProvider
 
         _secrets = concurrentDictionary.Values.OrderBy(x => x.Id).ToList();
 
+        if (!_firstPageTask.IsCompleted)
+        {
+            firstPageTcs.SetResult();
+        }
+
         _mediator.NotifyEvent(this, new CollectionRepositoryEventArgs(
             "vaultr::secrets",
             "vaultr::secrets",
